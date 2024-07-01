@@ -1,0 +1,47 @@
+{
+  "name": "Spent",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/zsh",
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        },
+        "workbench.colorTheme": "Default Dark+",
+        "git.enableSmartCommit": true,
+        "git.autofetch": true,
+        "git.postCommitCommand": "push",
+        "git.confirmSync": false,
+        "git.autoStash": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "files.autoSave": "onFocusChange"
+      },
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "github.codespaces",
+        "github.copilot",
+        "github.copilot-chat",
+        "mechatroner.rainbow-csv",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode-remote.remote-containers",
+        "ms-vscode-remote.remote-ssh",
+        "ms-vscode-remote.remote-ssh-edit",
+        "ms-vscode.remote-explorer",
+        "shinotatwu-ds.file-tree-generator",
+        "vue.volar"
+      ]
+    }
+  },
+  "postCreateCommand": "./.devcontainer/devcontainer-postcreate.sh"
+}

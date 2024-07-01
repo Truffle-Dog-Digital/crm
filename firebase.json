@@ -1,0 +1,39 @@
+{
+  "hosting": {
+    "public": "react-frontend/dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099,
+      "host": "0.0.0.0"
+    },
+    "functions": {
+      "port": 5001,
+      "host": "0.0.0.0"
+    },
+    "firestore": {
+      "port": 8085,
+      "host": "0.0.0.0"
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000,
+      "host": "0.0.0.0"
+    },
+    "logging": {
+      "port": 4500,
+      "host": "0.0.0.0"
+    },
+    "hosting": {
+      "port": 8081,
+      "host": "0.0.0.0"
+    }
+  }
+}
