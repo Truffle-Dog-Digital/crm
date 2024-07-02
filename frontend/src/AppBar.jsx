@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import UserMenu from "./UserMenu";
+import UserMenu from "./components/UserMenu";
 
 const CustomAppBar = ({ user, onMenuOpen }) => {
   return (

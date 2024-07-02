@@ -1,20 +1,6 @@
 import React, { useEffect, useState } from "react";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import Avatar from "@mui/material/Avatar";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Tooltip from "@mui/material/Tooltip";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import CircularProgress from "@mui/material/CircularProgress";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
+import * as Mui from "@mui/material";
+import * as MuiIcons from "@mui/icons-material";
 import { auth, db } from "./firebaseConfig";
 import {
   signInWithPopup,
@@ -35,7 +21,6 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      console.log("Auth state changed, user:", user);
     });
 
     return () => unsubscribe();
@@ -118,7 +103,6 @@ function App() {
               collection(db, "users", user.uid, "transactions"),
               transaction
             );
-            console.log("Added transaction:", transaction);
           }
           const endTime = Date.now();
           console.log(
@@ -186,7 +170,7 @@ function App() {
           )}
           <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
             <Typography variant="h6" component="div">
-              Spent
+              CRM
             </Typography>
           </Box>
           {user ? (

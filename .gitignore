@@ -23,4 +23,7 @@ firebase-debug.log
 .firebase/
 
 # Environment variables
-.env
+*.env
+
+# Text files, only used at runtime
+*.txt
