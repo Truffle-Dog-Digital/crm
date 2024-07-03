@@ -90,3 +90,31 @@ export const handleDrop = async (event, setDragging, handleFileChange) => {
   console.log("File dropped");
   await handleFileChange(event);
 };
+
+export const handlePaste = async (
+  event,
+  user,
+  setLoading,
+  setSummary,
+  setFileObjects
+) => {
+  event.preventDefault();
+  const text = event.clipboardData.getData("text");
+  try {
+    const rows = text.split("\n").filter((row) => row.trim() !== "");
+    const objects = rows.map((row) => JSON.parse(row));
+    setFileObjects(objects);
+
+    const checkResult = await checkImport(objects);
+    if (checkResult.error) {
+      setSummary({ error: checkResult.error });
+    } else {
+      setSummary({
+        totalObjects: checkResult.totalObjects,
+      });
+    }
+  } catch (error) {
+    console.error("Error processing clipboard content: ", error);
+    setSummary({ error: "Error processing clipboard content" });
+  }
+};

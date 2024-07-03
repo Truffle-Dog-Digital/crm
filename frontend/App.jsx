@@ -24,6 +24,7 @@ import {
   handleDragOver,
   handleDragLeave,
   handleDrop,
+  handlePaste,
 } from "./eventHandlers";
 import ToolbarComponent from "./Toolbar";
 import "./App.css";
@@ -47,6 +48,18 @@ function App() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const handlePasteEvent = (e) => {
+      handlePaste(e, user, setLoading, setSummary, setFileObjects);
+    };
+
+    window.addEventListener("paste", handlePasteEvent);
+
+    return () => {
+      window.removeEventListener("paste", handlePasteEvent);
+    };
+  }, [user]);
 
   const handleImport = async () => {
     setLoading(true);
