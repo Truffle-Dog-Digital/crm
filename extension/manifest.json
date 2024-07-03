@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Reability",
-  "description": "Automation for cut/paste",
-  "version": "1.0",
+  "name": "Truffle Dog Digital CRM",
+  "description": "Mostly automation for cut/paste in CRM tasks.",
+  "version": "3.0",
   "permissions": ["activeTab", "tabs", "storage"],
   "host_permissions": ["*://api.lemlist.com/*", "*://dashboard.lusha.com/*"],
   "background": {
@@ -27,9 +27,9 @@
     }
   ],
   "icons": {
-    "16": "icons/reability-16.png",
-    "32": "icons/reability-32.png",
-    "48": "icons/reability-48.png",
-    "128": "icons/reability-128.png"
+    "16": "crm-16.png",
+    "32": "crm-32.png",
+    "48": "crm-48.png",
+    "128": "crm-128.png"
   }
 }
