@@ -78,7 +78,7 @@ function App() {
         {user ? (
           <>
             Drop a JSON file here, load from it the menu or just paste JSONL
-            here.
+            from the clipboard.
             {loading && (
               <Box className="upload-overlay">
                 <CircularProgress />

@@ -89,7 +89,7 @@ const ToolbarComponent = ({
                   <input
                     id="upload-csv"
                     type="file"
-                    accept=".csv"
+                    accept=".jsonl"
                     style={{ display: "none" }}
                     onChange={(e) =>
                       handleFileChange(e, user, setLoading, setSummary, () =>
