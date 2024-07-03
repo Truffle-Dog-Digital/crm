@@ -1,5 +1,4 @@
 import { signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
-import { saveImportToFirestore } from "./saveImportToFirestore";
 import { checkImport } from "./checkImport";
 
 export const handleSignIn = async (auth) => {
@@ -47,7 +46,8 @@ export const handleFileChange = async (
   user,
   setLoading,
   setSummary,
-  handleCloseMenu
+  handleCloseMenu,
+  setFileObjects
 ) => {
   const file = event.target.files
     ? event.target.files[0]
@@ -57,6 +57,7 @@ export const handleFileChange = async (
     const text = await file.text();
     const rows = text.split("\n").filter((row) => row.trim() !== "");
     const objects = rows.map((row) => JSON.parse(row));
+    setFileObjects(objects);
 
     const checkResult = await checkImport(objects);
     if (checkResult.error) {
@@ -65,15 +66,6 @@ export const handleFileChange = async (
       setSummary({
         totalObjects: checkResult.totalObjects,
       });
-
-      // Optionally, proceed to save to Firestore
-      await saveImportToFirestore(
-        objects,
-        user,
-        setLoading,
-        setSummary,
-        handleCloseMenu
-      );
     }
   } catch (error) {
     console.error("Error reading file: ", error);
