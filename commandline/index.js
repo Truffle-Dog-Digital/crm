@@ -6,12 +6,13 @@ const linkedinGrabProfileDetails = require("./linkedinGrabProfileDetails");
 const linkedinConnect = require("./linkedinConnect");
 
 // Configuration
+const testMode = false;
 const headless = false;
 const inputFileCookies = "cookies.json";
-const inputFileProfiles = "profiles.txt";
+const inputFileProfiles = "profilesIn.txt";
+const outputPeopleConnected = "profilesOutConected.txt";
+const outputProfilesNotConnected = "profilesOutNotConnected.txt";
 const inputFileCustomText = "linkedinCustomConnection.txt";
-const outputPeopleConnected = "peopleConnected.txt";
-const outputProfilesNotConnected = "profilesNotConnected.txt";
 const outputFileLog = "connect.log";
 const logTo = ["console", "file"];
 
@@ -56,12 +57,20 @@ const log = (message) => {
         customText,
         log
       );
-      const connected = await linkedinConnect(page, customText, log);
 
-      if (profileDetails && connected) {
-        peopleConnectedStream.write(`${JSON.stringify(profileDetails)}\n`);
-      } else {
-        profilesNotConnectedStream.write(`${profile}\n`);
+      if (profileDetails) {
+        const connected = await linkedinConnect(
+          testMode,
+          page,
+          customText,
+          log
+        );
+
+        if (connected) {
+          peopleConnectedStream.write(`${JSON.stringify(profileDetails)}\n`);
+        } else {
+          profilesNotConnectedStream.write(`${profile}\n`);
+        }
       }
     } catch (error) {
       log(

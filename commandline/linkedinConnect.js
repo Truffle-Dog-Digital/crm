@@ -6,7 +6,7 @@ const delay = (timeout) =>
   new Promise((resolve) => setTimeout(resolve, timeout));
 
 // Assumes you're already on the LinkedIn profile page and the "Connect" button DOM element is loaded
-async function linkedinConnect(page, customText, log) {
+async function linkedinConnect(testMode, page, customText, log) {
   try {
     let connectButton = null;
     // Locate the "Connect" button using a CSS selector
@@ -39,33 +39,35 @@ async function linkedinConnect(page, customText, log) {
         // Wait for 3 seconds to observe the result
         // await delay(3000);
 
-        // ==================== PRODUCTION ===============
+        if (testMode) {
+          // Click the dismiss "x" button and wait for it to disappear
+          const dismissButton = await page.waitForSelector(
+            'button[aria-label="Dismiss"]'
+          );
 
-        // Click the "Send invitation" button
-        const sendInvitationButton = await page.waitForSelector(
-          'button[aria-label="Send invitation"]'
-        );
+          if (dismissButton) {
+            await dismissButton.click();
+            await waitForElementToDisappear(
+              page,
+              'button[aria-label="Dismiss"]'
+            );
+            log(`Dismissed invitation`);
+          }
+        } else {
+          // Click the "Send invitation" button and wait for it to disappear
+          const sendInvitationButton = await page.waitForSelector(
+            'button[aria-label="Send invitation"]'
+          );
 
-        if (sendInvitationButton) {
-          await sendInvitationButton.click();
-          await waitForElementToDisappear(page, 'button[aria-label="Dismiss"]');
-          log(`Sent invitation`);
+          if (sendInvitationButton) {
+            await sendInvitationButton.click();
+            await waitForElementToDisappear(
+              page,
+              'button[aria-label="Dismiss"]'
+            );
+            log(`Sent invitation`);
+          }
         }
-
-        // ==================== TEST ===============
-
-        // Click the dismiss "x" button (debug only)
-        // const dismissButton = await page.waitForSelector(
-        //   'button[aria-label="Dismiss"]'
-        // );
-
-        // if (dismissButton) {
-        //   await dismissButton.click();
-        //   await waitForElementToDisappear(page, 'button[aria-label="Dismiss"]');
-        //   log(`Dismissed invitation`);
-        // }
-
-        // ==================== END ===============
 
         return true;
       }

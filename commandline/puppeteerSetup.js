@@ -12,7 +12,8 @@ async function createPage(cleanedCookies, headless) {
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1024, height: 1024 });
-  await page.setDefaultNavigationTimeout(10000); // 10 seconds
+  await page.setDefaultNavigationTimeout(7000);
+  await page.setDefaultTimeout(7000);
   await page.deleteCookie(...(await page.cookies()));
   await page.setCookie(...cleanedCookies);
   return { browser, page };
