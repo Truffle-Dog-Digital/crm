@@ -1,5 +1,6 @@
 import { signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
 import { saveImportToFirestore } from "./saveImportToFirestore";
+import { checkImport } from "./checkImport";
 
 export const handleSignIn = async (auth) => {
   const provider = new GoogleAuthProvider();
@@ -41,7 +42,7 @@ export const handleCloseMenu = (setMenuAnchorEl) => {
   setMenuAnchorEl(null);
 };
 
-export const handleFileChange = (
+export const handleFileChange = async (
   event,
   user,
   setLoading,
@@ -51,7 +52,33 @@ export const handleFileChange = (
   const file = event.target.files
     ? event.target.files[0]
     : event.dataTransfer.files[0];
-  saveImportToFirestore(file, user, setLoading, setSummary, handleCloseMenu);
+
+  try {
+    const text = await file.text();
+    const rows = text.split("\n").filter((row) => row.trim() !== "");
+    const objects = rows.map((row) => JSON.parse(row));
+
+    const checkResult = await checkImport(objects);
+    if (checkResult.error) {
+      setSummary({ error: checkResult.error });
+    } else {
+      setSummary({
+        totalObjects: checkResult.totalObjects,
+      });
+
+      // Optionally, proceed to save to Firestore
+      await saveImportToFirestore(
+        objects,
+        user,
+        setLoading,
+        setSummary,
+        handleCloseMenu
+      );
+    }
+  } catch (error) {
+    console.error("Error reading file: ", error);
+    setSummary({ error: "Error reading file" });
+  }
 };
 
 export const handleDragOver = (event, setDragging) => {
@@ -65,9 +92,9 @@ export const handleDragLeave = (setDragging) => {
   console.log("Drag leave");
 };
 
-export const handleDrop = (event, setDragging, handleFileChange) => {
+export const handleDrop = async (event, setDragging, handleFileChange) => {
   event.preventDefault();
   setDragging(false);
   console.log("File dropped");
-  handleFileChange(event);
+  await handleFileChange(event);
 };

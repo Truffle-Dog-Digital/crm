@@ -91,11 +91,17 @@ function App() {
       </Box>
       {summary && (
         <Dialog open={Boolean(summary)} onClose={() => setSummary(null)}>
-          <DialogTitle>CSV Loaded</DialogTitle>
+          <DialogTitle>
+            {summary.error ? "Error" : "Import Summary"}
+          </DialogTitle>
           <DialogContent>
-            <Typography>Start Date: {summary.startDate}</Typography>
-            <Typography>End Date: {summary.endDate}</Typography>
-            <Typography>Number of Rows: {summary.rowCount}</Typography>
+            {summary.error ? (
+              <Typography>{summary.error}</Typography>
+            ) : (
+              <>
+                <Typography>Total Objects: {summary.totalObjects}</Typography>
+              </>
+            )}
           </DialogContent>
         </Dialog>
       )}
