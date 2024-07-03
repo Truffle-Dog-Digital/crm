@@ -1,7 +1,7 @@
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
-export const processSaveImportToFirestore = async (
+export const saveImportToFirestore = async (
   file,
   user,
   setLoading,

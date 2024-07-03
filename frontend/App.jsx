@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -24,8 +23,9 @@ import {
   handleDragLeave,
   handleDrop,
 } from "./eventHandlers";
-import ToolbarComponent from "./ToolbarComponent";
+import ToolbarComponent from "./Toolbar";
 import "./App.css";
+import Box from "@mui/material/Box"; // Make sure this is last, otherwise it breaks the default theme somehow
 
 function App() {
   const [user, setUser] = useState(null);
@@ -77,7 +77,8 @@ function App() {
       >
         {user ? (
           <>
-            Drag and drop a CSV file here or use the menu to upload.
+            Drop a JSON file here, load from it the menu or just paste JSONL
+            here.
             {loading && (
               <Box className="upload-overlay">
                 <CircularProgress />

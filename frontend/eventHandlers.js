@@ -1,5 +1,5 @@
 import { signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
-import { processSaveImportToFirestore } from "./processSaveImportToFirestore";
+import { saveImportToFirestore } from "./saveImportToFirestore";
 
 export const handleSignIn = async (auth) => {
   const provider = new GoogleAuthProvider();
@@ -51,13 +51,7 @@ export const handleFileChange = (
   const file = event.target.files
     ? event.target.files[0]
     : event.dataTransfer.files[0];
-  processSaveImportToFirestore(
-    file,
-    user,
-    setLoading,
-    setSummary,
-    handleCloseMenu
-  );
+  saveImportToFirestore(file, user, setLoading, setSummary, handleCloseMenu);
 };
 
 export const handleDragOver = (event, setDragging) => {

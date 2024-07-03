@@ -14,5 +14,12 @@ export default defineConfig({
     port: 8080,
     https: false,
     host: "0.0.0.0",
+    hmr: {
+      protocol: "ws",
+      host: "localhost",
+    },
+    watch: {
+      usePolling: true,
+    },
   },
 });
