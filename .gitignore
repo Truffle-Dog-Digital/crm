@@ -30,3 +30,7 @@ firebase-debug.log
 
 # Mac
 .DS_Store
+
+# Secrets
+cookies.json
+secrets.json
