@@ -6,13 +6,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 import { auth } from "./firebaseConfig";
-import {
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut,
-  onAuthStateChanged,
-} from "firebase/auth";
 import {
   handleSignIn,
   handleSignOut,
@@ -29,26 +24,17 @@ import {
 import ToolbarComponent from "./Toolbar";
 import UploadArea from "./UploadArea";
 import "./App.css";
-import Box from "@mui/material/Box";
 import { saveImportToFirestore } from "./saveImportToFirestore";
+import useAuthState from "./useAuthState";
 
 function App() {
-  const [user, setUser] = useState(null);
+  const user = useAuthState(); // Use the custom hook
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [fileObjects, setFileObjects] = useState([]);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      console.log("Auth state changed, user:", user);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     const handlePasteEvent = (e) => {
