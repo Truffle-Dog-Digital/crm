@@ -6,7 +6,7 @@ const delay = (timeout) =>
   new Promise((resolve) => setTimeout(resolve, timeout));
 
 // Assumes you're already on the LinkedIn profile page and the "Connect" button DOM element is loaded
-async function linkedinConnect(testMode, page, customText, log) {
+async function linkedinConnect(testMode, profile, page, customText, log) {
   try {
     let connectButton = null;
     // Locate the "Connect" button using a CSS selector
@@ -51,7 +51,7 @@ async function linkedinConnect(testMode, page, customText, log) {
               page,
               'button[aria-label="Dismiss"]'
             );
-            log(`Dismissed invitation`);
+            log(`Dismissed invitation: ${profile}`);
           }
         } else {
           // Click the "Send invitation" button and wait for it to disappear
@@ -65,7 +65,7 @@ async function linkedinConnect(testMode, page, customText, log) {
               page,
               'button[aria-label="Dismiss"]'
             );
-            log(`Sent invitation`);
+            log(`Sent invitation: ${profile}`);
           }
         }
 

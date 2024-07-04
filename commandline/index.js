@@ -8,7 +8,7 @@ const linkedinConnect = require("./linkedinConnect");
 // Configuration
 const testMode = false;
 const headless = false;
-const inputFileCookies = "cookies.json";
+const inputFileCookies = "linkedinCookies.json";
 const inputFileProfiles = "profilesIn.txt";
 const outputPeopleConnected = "profilesOutConected.txt";
 const outputProfilesNotConnected = "profilesOutNotConnected.txt";
@@ -61,6 +61,7 @@ const log = (message) => {
       if (profileDetails) {
         const connected = await linkedinConnect(
           testMode,
+          profile,
           page,
           customText,
           log
