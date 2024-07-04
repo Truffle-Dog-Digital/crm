@@ -27,8 +27,9 @@ import {
   handlePaste,
 } from "./eventHandlers";
 import ToolbarComponent from "./Toolbar";
+import UploadArea from "./UploadArea";
 import "./App.css";
-import Box from "@mui/material/Box"; // Make sure this is last, otherwise it breaks the default theme somehow
+import Box from "@mui/material/Box";
 import { saveImportToFirestore } from "./saveImportToFirestore";
 
 function App() {
@@ -67,7 +68,7 @@ function App() {
       setMenuAnchorEl(null)
     );
     setLoading(false);
-    setSummary(null); // Close the summary dialog
+    setSummary(null);
   };
 
   return (
@@ -104,11 +105,21 @@ function App() {
         setLoading={setLoading}
         setSummary={setSummary}
       />
-      <Box
-        className={`upload-container ${dragging ? "dragging" : ""}`}
-        onDragOver={(e) => handleDragOver(e, setDragging)}
-        onDragLeave={() => handleDragLeave(setDragging)}
-        onDrop={(e) =>
+      <UploadArea
+        user={user}
+        handleFileChange={(e) =>
+          handleFileChange(
+            e,
+            user,
+            setLoading,
+            setSummary,
+            () => handleCloseMenu(setMenuAnchorEl),
+            setFileObjects
+          )
+        }
+        handleDragOver={(e) => handleDragOver(e, setDragging)}
+        handleDragLeave={() => handleDragLeave(setDragging)}
+        handleDrop={(e) =>
           handleDrop(e, setDragging, (e) =>
             handleFileChange(
               e,
@@ -120,21 +131,9 @@ function App() {
             )
           )
         }
-      >
-        {user ? (
-          <>
-            Drop a JSON file here, load from it the menu or just paste JSONL
-            from the clipboard.
-            {loading && (
-              <Box className="upload-overlay">
-                <CircularProgress />
-              </Box>
-            )}
-          </>
-        ) : (
-          <Typography>Sign in to get started</Typography>
-        )}
-      </Box>
+        dragging={dragging}
+        loading={loading}
+      />
       {summary && (
         <Dialog open={Boolean(summary)} onClose={() => setSummary(null)}>
           <DialogTitle>
