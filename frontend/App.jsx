@@ -1,5 +1,5 @@
+// App.jsx
 import React, { useState } from "react";
-import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -22,12 +22,11 @@ import "./App.css";
 import { saveImportToFirestore } from "./saveImportToFirestore";
 import useAuthState from "./useAuthState";
 import useFileHandlers from "./useFileHandlers";
-
-function App() {
+import withLoading from "./withLoading.jsx";
+function App({ loading, setLoading }) {
   const user = useAuthState();
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState(null);
 
   const {
@@ -98,17 +97,8 @@ function App() {
           </DialogActions>
         </Dialog>
       )}
-      {loading && (
-        <Dialog open={true}>
-          <DialogContent>
-            <Box display="flex" justifyContent="center" alignItems="center">
-              <CircularProgress />
-            </Box>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 }
 
-export default App;
+export default withLoading(App);
