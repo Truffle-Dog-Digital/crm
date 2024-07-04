@@ -26,8 +26,6 @@ const ToolbarComponent = ({
   setMenuAnchorEl,
   setAnchorEl,
   auth,
-  setLoading,
-  setSummary,
 }) => {
   return (
     <AppBar position="static">
@@ -92,7 +90,7 @@ const ToolbarComponent = ({
                     accept=".jsonl"
                     style={{ display: "none" }}
                     onChange={(e) =>
-                      handleFileChange(e, user, setLoading, setSummary, () =>
+                      handleFileChange(e, () =>
                         handleCloseMenu(setMenuAnchorEl)
                       )
                     }

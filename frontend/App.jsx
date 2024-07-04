@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -15,38 +15,29 @@ import {
   handleCloseUserMenu,
   handleOpenMenu,
   handleCloseMenu,
-  handleFileChange,
-  handleDragOver,
-  handleDragLeave,
-  handleDrop,
-  handlePaste,
 } from "./eventHandlers";
 import ToolbarComponent from "./Toolbar";
 import UploadArea from "./UploadArea";
 import "./App.css";
 import { saveImportToFirestore } from "./saveImportToFirestore";
 import useAuthState from "./useAuthState";
+import useFileHandlers from "./useFileHandlers";
 
 function App() {
-  const user = useAuthState(); // Use the custom hook
+  const user = useAuthState();
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState(null);
-  const [dragging, setDragging] = useState(false);
-  const [fileObjects, setFileObjects] = useState([]);
 
-  useEffect(() => {
-    const handlePasteEvent = (e) => {
-      handlePaste(e, user, setLoading, setSummary, setFileObjects);
-    };
-
-    window.addEventListener("paste", handlePasteEvent);
-
-    return () => {
-      window.removeEventListener("paste", handlePasteEvent);
-    };
-  }, [user]);
+  const {
+    fileObjects,
+    dragging,
+    handleFileChange,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+  } = useFileHandlers(user, setLoading, setSummary);
 
   const handleImport = async () => {
     setLoading(true);
@@ -69,54 +60,19 @@ function App() {
         handleCloseUserMenu={handleCloseUserMenu}
         handleSignOut={handleSignOut}
         handleSignIn={handleSignIn}
-        handleFileChange={(
-          e,
-          user,
-          setLoading,
-          setSummary,
-          handleCloseMenu
-        ) => {
-          handleFileChange(
-            e,
-            user,
-            setLoading,
-            setSummary,
-            handleCloseMenu,
-            setFileObjects
-          );
-        }}
+        handleFileChange={(e) =>
+          handleFileChange(e, () => handleCloseMenu(setMenuAnchorEl))
+        }
         setMenuAnchorEl={setMenuAnchorEl}
         setAnchorEl={setAnchorEl}
         auth={auth}
-        setLoading={setLoading}
-        setSummary={setSummary}
       />
       <UploadArea
         user={user}
-        handleFileChange={(e) =>
-          handleFileChange(
-            e,
-            user,
-            setLoading,
-            setSummary,
-            () => handleCloseMenu(setMenuAnchorEl),
-            setFileObjects
-          )
-        }
-        handleDragOver={(e) => handleDragOver(e, setDragging)}
-        handleDragLeave={() => handleDragLeave(setDragging)}
-        handleDrop={(e) =>
-          handleDrop(e, setDragging, (e) =>
-            handleFileChange(
-              e,
-              user,
-              setLoading,
-              setSummary,
-              () => handleCloseMenu(setMenuAnchorEl),
-              setFileObjects
-            )
-          )
-        }
+        handleFileChange={(e) => handleFileChange(e)}
+        handleDragOver={(e) => handleDragOver(e)}
+        handleDragLeave={handleDragLeave}
+        handleDrop={(e) => handleDrop(e)}
         dragging={dragging}
         loading={loading}
       />
