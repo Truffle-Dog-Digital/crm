@@ -64,7 +64,7 @@ async function linkedinGrabProfileDetails(page, profile, customText, log) {
 
     return { name, requestSent, profile, customText, roles };
   } catch (error) {
-    log(`Something wrong with this profile. ${error.message}`);
+    log(`Error with: ${profile} -- ${error.message}`);
     return false;
   }
 }

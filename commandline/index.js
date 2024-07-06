@@ -72,6 +72,8 @@ const log = (message) => {
         } else {
           profilesNotConnectedStream.write(`${profile}\n`);
         }
+      } else {
+        profilesNotConnectedStream.write(`${profile}\n`);
       }
     } catch (error) {
       log(

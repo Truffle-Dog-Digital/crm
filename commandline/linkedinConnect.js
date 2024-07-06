@@ -15,7 +15,7 @@ async function linkedinConnect(testMode, profile, page, customText, log) {
         'xpath///div[contains(@class, "ph5")]//span[text()="Connect"]'
       );
     } catch (error) {
-      log(`Couldn't locate a connect button: ${error.message}`);
+      log(`No connect button: ${profile}`);
       return false;
     }
 
