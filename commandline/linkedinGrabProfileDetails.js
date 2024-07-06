@@ -5,9 +5,7 @@ async function linkedinGrabProfileDetails(page, profile, customText, log) {
 
     // Grab the person's name
     const name = await page.evaluate(() => {
-      const element = document.querySelector(
-        "div.ph5.pb5 h1.text-heading-xlarge"
-      );
+      const element = document.querySelector("div.ph5 h1.text-heading-xlarge");
       return element ? element.textContent.trim() : null;
     });
 
