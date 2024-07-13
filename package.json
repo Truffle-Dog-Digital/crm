@@ -5,7 +5,8 @@
   "scripts": {
     "local": "cross-env VITE_LOCAL_DEV=true dotenv -e .env -- sh -c 'concurrently \"cd frontend && npm run local\" \"firebase emulators:start --project $FIREBASE_PROJECT_ID\"'",
     "deploy": "firebase deploy",
-    "lint": "eslint . --ext .js,.jsx"
+    "lint": "eslint . --ext .js,.jsx",
+    "filetree": "node filetree.js"
   },
   "devDependencies": {
     "concurrently": "^8.0.1",
@@ -17,6 +18,7 @@
   "dependencies": {
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
-    "dotenv-expand": "^11.0.6"
+    "dotenv-expand": "^11.0.6",
+    "ignore": "^5.3.1"
   }
 }

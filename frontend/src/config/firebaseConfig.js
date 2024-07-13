@@ -3,6 +3,7 @@ import {
   getAuth,
   connectAuthEmulator,
   onAuthStateChanged,
+  GoogleAuthProvider, // Add GoogleAuthProvider here
 } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
@@ -19,6 +20,7 @@ const firebaseConfig = {
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider(); // Ensure this is included
 const db = getFirestore(app);
 const functions = getFunctions(app);
 
@@ -29,4 +31,4 @@ if (window.location.hostname === "localhost") {
   connectFunctionsEmulator(functions, "localhost", 5001);
 }
 
-export { app, auth, db, functions, onAuthStateChanged };
+export { app, auth, db, functions, onAuthStateChanged, googleProvider };
