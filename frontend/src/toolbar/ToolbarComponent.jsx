@@ -1,32 +1,35 @@
-// src/toolbar/ToolbarComponent.jsx
+import "./ToolbarComponent.css";
 import React from "react";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
+import { AppBar, Toolbar, Typography, Button, IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import { useAuth } from "../context/AuthContext";
 
 const ToolbarComponent = () => {
+  const { user, login, logout } = useAuth();
+
   return (
     <AppBar position="static">
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+      <Toolbar className="toolbar">
         <IconButton
           edge="start"
           color="inherit"
           aria-label="menu"
-          sx={{ mr: 2 }}
+          className="menu-icon"
         >
           <MenuIcon />
         </IconButton>
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{ flexGrow: 1, textAlign: "center" }}
-        >
+        <Typography variant="h6" component="div" className="toolbar-title">
           Truffle Dog Digital CRM
         </Typography>
-        <Button color="inherit">Login</Button>
+        {user ? (
+          <Button color="inherit" onClick={logout}>
+            Logout
+          </Button>
+        ) : (
+          <Button color="inherit" onClick={login}>
+            Login
+          </Button>
+        )}
       </Toolbar>
     </AppBar>
   );

@@ -1,9 +1,11 @@
-// src/body/BodyComponent.jsx
+import { useAuth } from "../context/AuthContext";
 import React from "react";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 const BodyComponent = () => {
+  const { user } = useAuth();
+
   return (
     <Box
       display="flex"
@@ -12,7 +14,7 @@ const BodyComponent = () => {
       minHeight="80vh"
       bgcolor="background.paper"
     >
-      <Typography variant="h6">Log in to get started</Typography>
+      {!user && <Typography variant="h6">Sign in to get started</Typography>}
     </Box>
   );
 };

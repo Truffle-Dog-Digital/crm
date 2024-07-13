@@ -1,0 +1,13 @@
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.toolbar-title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.menu-icon {
+  margin-right: 16px; /* Equivalent to MUI's sx={{ mr: 2 }} */
+}
