@@ -85,28 +85,32 @@ function waitForElement(selector, timeout = 3000) {
 function injectHTMLAndCSS(htmlPath, cssPath, injectInto) {
   return waitForElement(injectInto).then((injectTarget) => {
     return new Promise((resolve, reject) => {
-      // Fetch and inject CSS
-      fetch(chrome.runtime.getURL(cssPath))
-        .then((response) => response.text())
-        .then((css) => {
-          const style = document.createElement("style");
-          style.textContent = css;
-          document.head.appendChild(style);
-        })
-        .catch((error) => reject(error));
+      const fetchCSS = cssPath
+        ? fetch(chrome.runtime.getURL(cssPath))
+            .then((response) => response.text())
+            .then((css) => {
+              const style = document.createElement("style");
+              style.textContent = css;
+              document.head.appendChild(style);
+            })
+            .catch((error) => reject(error))
+        : Promise.resolve();
 
-      // Fetch and inject HTML
-      fetch(chrome.runtime.getURL(htmlPath))
-        .then((response) => response.text())
-        .then((html) => {
-          const tempDiv = document.createElement("div");
-          tempDiv.innerHTML = html;
-          while (tempDiv.firstChild) {
-            injectTarget.appendChild(tempDiv.firstChild);
-          }
-          resolve();
-        })
-        .catch((error) => reject(error));
+      const fetchHTML = htmlPath
+        ? fetch(chrome.runtime.getURL(htmlPath))
+            .then((response) => response.text())
+            .then((html) => {
+              const tempDiv = document.createElement("div");
+              tempDiv.innerHTML = html;
+              while (tempDiv.firstChild) {
+                injectTarget.appendChild(tempDiv.firstChild);
+              }
+              resolve();
+            })
+            .catch((error) => reject(error))
+        : Promise.resolve();
+
+      Promise.all([fetchCSS, fetchHTML]).then(resolve).catch(reject);
     });
   });
 }

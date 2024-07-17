@@ -26,21 +26,11 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": [
-        "drawer.html",
-        "drawer.css",
-        "lusha-contacts.html",
-        "lusha-contacts.css"
-      ],
+      "resources": ["drawer.html", "drawer.css", "lusha-contacts.html"],
       "matches": ["*://dashboard.lusha.com/*"]
     },
     {
-      "resources": [
-        "drawer.html",
-        "drawer.css",
-        "linkedin.html",
-        "linkedin.css"
-      ],
+      "resources": ["drawer.html", "drawer.css", "linkedin.html"],
       "matches": ["*://www.linkedin.com/*"]
     }
   ],

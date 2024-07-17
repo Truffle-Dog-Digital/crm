@@ -10,7 +10,7 @@
   transition: 0.5s;
   border-left: 1px solid #ccc;
   font-family: Arial, sans-serif;
-  box-sizing: border-box; /* Ensure padding and border are included in the element's width and height */
+  box-sizing: border-box;
 }
 
 #reabilityDrawerHeader {
@@ -20,7 +20,7 @@
   padding: 12px;
   border-bottom: 1px solid #eee;
   background-color: #f5f5f5;
-  box-sizing: border-box; /* Ensure padding is included in the element's width */
+  box-sizing: border-box;
 }
 
 #reabilityDrawerHeader h1 {
@@ -42,11 +42,34 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100% - 54px); /* Adjusted to consider header height */
-  box-sizing: border-box; /* Ensure padding is included in the element's width */
+  height: calc(100% - 54px);
+  box-sizing: border-box;
 }
 
 body.reabilityDrawerOpen {
-  margin-right: 300px; /* Adjust body margin to accommodate drawer width */
-  transition: margin-right 0.5s; /* Smooth transition */
+  margin-right: 300px;
+  transition: margin-right 0.5s;
+}
+
+.reabilityMuiButton {
+  display: block !important;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.75;
+  color: #fff;
+  background-color: #1976d2;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  text-transform: uppercase;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }

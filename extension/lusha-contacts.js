@@ -93,11 +93,7 @@ async function copyToClipboard(text) {
 }
 
 // Initialize and inject the HTML and CSS
-injectHTMLAndCSS(
-  "lusha-contacts.html",
-  "lusha-contacts.css",
-  "#reabilityDrawerContent"
-)
+injectHTMLAndCSS("lusha-contacts.html", null, "#reabilityDrawerContent")
   .then(() => {
     setupGrabButton();
     setupClearButton();

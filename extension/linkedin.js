@@ -93,14 +93,11 @@ async function copyToClipboard(text) {
 }
 
 // Initialize and inject the HTML and CSS
-injectHTMLAndCSS("linkedin.html", "linkedin.css", "#reabilityDrawerContent")
+injectHTMLAndCSS("linkedin.html", null, "#reabilityDrawerContent")
   .then(() => {
     setupGrabButton();
     setupClearButton();
   })
   .catch((error) => {
-    console.error(
-      "REABILITY: Error injecting Lusha Contacts HTML and CSS:",
-      error
-    );
+    console.error("REABILITY: Error injecting Linkedin HTML and CSS:", error);
   });
