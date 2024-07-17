@@ -4,7 +4,11 @@
   "description": "Mostly automation for cut/paste in CRM tasks.",
   "version": "3.0",
   "permissions": ["activeTab", "tabs", "storage"],
-  "host_permissions": ["*://api.lemlist.com/*", "*://dashboard.lusha.com/*"],
+  "host_permissions": [
+    "*://api.lemlist.com/*",
+    "*://dashboard.lusha.com/*",
+    "*://www.linkedin.com/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -12,6 +16,11 @@
     {
       "matches": ["*://dashboard.lusha.com/prospecting/contacts*"],
       "js": ["helpers.js", "drawer.js", "lusha-contacts.js"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["*://www.linkedin.com/mynetwork/invitation-manager/sent*"],
+      "js": ["helpers.js", "drawer.js", "linkedin.js"],
       "run_at": "document_end"
     }
   ],
@@ -24,6 +33,15 @@
         "lusha-contacts.css"
       ],
       "matches": ["*://dashboard.lusha.com/*"]
+    },
+    {
+      "resources": [
+        "drawer.html",
+        "drawer.css",
+        "linkedin.html",
+        "linkedin.css"
+      ],
+      "matches": ["*://www.linkedin.com/*"]
     }
   ],
   "icons": {
