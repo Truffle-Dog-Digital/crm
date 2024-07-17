@@ -15,12 +15,22 @@
   "content_scripts": [
     {
       "matches": ["*://dashboard.lusha.com/prospecting/contacts*"],
-      "js": ["helpers.js", "drawer.js", "lusha-contacts.js"],
+      "js": [
+        "helpers-dom.js",
+        "helpers-localStorage.js",
+        "drawer.js",
+        "lusha-contacts.js"
+      ],
       "run_at": "document_end"
     },
     {
       "matches": ["*://www.linkedin.com/mynetwork/invitation-manager/sent*"],
-      "js": ["helpers.js", "drawer.js", "linkedin.js"],
+      "js": [
+        "helpers-dom.js",
+        "helpers-localStorage.js",
+        "drawer.js",
+        "linkedin.js"
+      ],
       "run_at": "document_end"
     }
   ],

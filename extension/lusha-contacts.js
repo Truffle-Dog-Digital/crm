@@ -99,8 +99,5 @@ injectHTMLAndCSS("lusha-contacts.html", null, "#reabilityDrawerContent")
     setupClearButton();
   })
   .catch((error) => {
-    console.error(
-      "REABILITY: Error injecting Lusha Contacts HTML and CSS:",
-      error
-    );
+    console.error("REABILITY: Error setting up Lusha HTML and CSS:", error);
   });

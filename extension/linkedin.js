@@ -1,103 +1,43 @@
-function setupGrabButton() {
-  const grabButton = document.getElementById("reabilityLushaListGrab");
-  if (grabButton) {
-    grabButton.addEventListener("click", handleLushaListGrabClick);
+function setupWithdrawButton() {
+  const button = document.getElementById("reabilityLinkedinWithdraw");
+  if (button) {
+    button.addEventListener("click", handleWithdrawButtonClick);
   }
 }
 
-function setupClearButton() {
-  const clearButton = document.getElementById("clearProfiles");
-  if (clearButton) {
-    clearButton.addEventListener("click", handleClearProfilesClick);
-  }
-}
+async function handleWithdrawButtonClick() {
+  console.log("REABILITY: Withdraw button clicked");
 
-// Function to handle Grab Contacts button click
-async function handleLushaListGrabClick() {
-  console.log("REABILITY: Grab Contacts button clicked");
-  const linkedinUrls = await getLushaContacts();
-  console.log("REABILITY: Found LinkedIn URLs", linkedinUrls);
-  await appendLinkedInUrlsToStorage(linkedinUrls);
-  const allUrls = await getLocalStorage("REABILITY_PROFILES");
-  console.log("REABILITY: All LinkedIn URLs in storage", allUrls);
-  const lineDelimitedUrls = allUrls.join("\n");
-  await copyToClipboard(lineDelimitedUrls);
-  console.log("REABILITY: Line delimited URLs", lineDelimitedUrls);
-}
-
-// Function to get selected Lusha contacts
-async function getLushaContacts() {
-  const contacts = document.querySelectorAll(
-    "[data-test-id^='contacts-table-contact-name-']"
-  );
-  const linkedinUrls = [];
-
-  contacts.forEach((contact) => {
-    const checkbox = contact.querySelector('input[type="checkbox"]');
-    if (checkbox && checkbox.checked) {
-      const linkedinUrl = contact.querySelector('a[href*="linkedin.com"]');
-      if (linkedinUrl) {
-        linkedinUrls.push(linkedinUrl.href);
-      }
-    }
-  });
-
-  return linkedinUrls;
-}
-
-// Function to append LinkedIn URLs to local storage
-async function appendLinkedInUrlsToStorage(newUrls) {
-  const existingUrls = (await getLocalStorage("REABILITY_PROFILES")) || [];
-  const updatedUrls = [...existingUrls, ...newUrls];
-  await setLocalStorage("REABILITY_PROFILES", updatedUrls);
-}
-
-// Function to handle Clear Profiles button click
-async function handleClearProfilesClick() {
-  console.log("REABILITY: Clear Profiles button clicked");
-  await clearLinkedInUrlsFromStorage();
-  await clearClipboard();
-}
-
-// Function to clear LinkedIn URLs from local storage
-async function clearLinkedInUrlsFromStorage() {
-  try {
-    await setLocalStorage("REABILITY_PROFILES", []);
-    console.log("REABILITY: LinkedIn URLs cleared from storage");
-  } catch (error) {
-    console.error(
-      "REABILITY: Error clearing LinkedIn URLs from storage",
-      error
+  while (true) {
+    const buttons = await waitForXPath(
+      "//div[contains(@class, 'invitation-card__container')][.//span[contains(@class, 'time-badge') and contains(., 'month')]]//button[span[text()='Withdraw']]",
+      3000
     );
+
+    if (!buttons || buttons.length === 0) {
+      console.log("No more withdrawal buttons found, stopping.");
+      break;
+    }
+
+    buttons[0].click();
+
+    const withdrawDialogButton = await waitForXPath(
+      "//div[@data-test-modal and @role='alertdialog']//span[text()='Withdraw']",
+      3000
+    );
+
+    if (withdrawDialogButton && withdrawDialogButton.length > 0) {
+      withdrawDialogButton[0].click();
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second before the next iteration
   }
 }
 
-// Function to clear the clipboard
-async function clearClipboard() {
-  try {
-    await navigator.clipboard.writeText("");
-    console.log("REABILITY: Clipboard cleared");
-  } catch (error) {
-    console.error("REABILITY: Error clearing the clipboard", error);
-  }
-}
-
-// Function to copy text to clipboard
-async function copyToClipboard(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-    console.log("REABILITY: Text copied to clipboard");
-  } catch (error) {
-    console.error("REABILITY: Error copying text to clipboard", error);
-  }
-}
-
-// Initialize and inject the HTML and CSS
 injectHTMLAndCSS("linkedin.html", null, "#reabilityDrawerContent")
   .then(() => {
-    setupGrabButton();
-    setupClearButton();
+    setupWithdrawButton();
   })
   .catch((error) => {
-    console.error("REABILITY: Error injecting Linkedin HTML and CSS:", error);
+    console.error("REABILITY: Error setting up Linkedin HTML and CSS:", error);
   });

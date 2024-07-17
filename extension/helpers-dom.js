@@ -1,62 +1,59 @@
-function setLocalStorage(key, value) {
-  try {
-    const result = new Promise((resolve, reject) => {
-      chrome.storage.local.set({ [key]: value }, () => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-        } else {
-          resolve();
-        }
-      });
-    });
+// Helper function to wait for all elements using XPath
+async function waitForXPath(xpath, timeout = 3000) {
+  return new Promise((resolve) => {
+    const intervalTime = 100;
+    let elapsedTime = 0;
 
-    Promise.race([
-      result,
-      new Promise(
-        (_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000) // 5 seconds timeout
-      ),
-    ]);
-
-    console.log(`REABILITY: ${key} saved successfully.`);
-  } catch (error) {
-    if (error.message === "Timeout") {
-      console.error(`REABILITY: Error saving ${key}: Timeout after 5 seconds`);
-    } else {
-      console.error(`REABILITY: Error saving ${key}:`, error);
-    }
-  }
+    const interval = setInterval(() => {
+      const results = [];
+      const query = document.evaluate(
+        xpath,
+        document,
+        null,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        null
+      );
+      for (let i = 0; i < query.snapshotLength; i++) {
+        results.push(query.snapshotItem(i));
+      }
+      if (results.length > 0) {
+        clearInterval(interval);
+        resolve(results);
+      } else if (elapsedTime >= timeout) {
+        clearInterval(interval);
+        resolve(null); // Return null if timeout is reached
+      }
+      elapsedTime += intervalTime;
+    }, intervalTime);
+  });
 }
 
-function getLocalStorage(key) {
-  try {
-    const result = new Promise((resolve, reject) => {
-      chrome.storage.local.get([key], (data) => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-        } else {
-          resolve(data[key] || null); // Resolve with null if key is not found
-        }
-      });
-    });
+// Function to wait for an element to disappear using XPath
+function waitForXPathToDisappear(xpath, timeout = 3000) {
+  return new Promise((resolve, reject) => {
+    const intervalTime = 100;
+    let elapsedTime = 0;
 
-    const value = Promise.race([
-      result,
-      new Promise(
-        (_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000) // 5 seconds timeout
-      ),
-    ]);
-
-    return value;
-  } catch (error) {
-    if (error.message === "Timeout") {
-      console.error(
-        `REABILITY: Error retrieving ${key}: Timeout after 5 seconds`
-      );
-    } else {
-      console.error(`REABILITY: Error retrieving ${key}:`, error);
-    }
-    return null;
-  }
+    const interval = setInterval(() => {
+      const element = document.evaluate(
+        xpath,
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
+      if (!element) {
+        clearInterval(interval);
+        resolve();
+      } else if (elapsedTime >= timeout) {
+        clearInterval(interval);
+        reject(
+          new Error(`Timeout: Element with XPath "${xpath}" did not disappear`)
+        );
+      }
+      elapsedTime += intervalTime;
+    }, intervalTime);
+  });
 }
 
 function waitForElement(selector, timeout = 3000) {
