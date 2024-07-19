@@ -1,42 +1,46 @@
-function setupWithdrawButton() {
-  const button = document.getElementById("reabilityLinkedinWithdraw");
+function setupUpdateConnectedButton() {
+  const button = document.getElementById("reabilityUpdateConnected");
   if (button) {
-    button.addEventListener("click", handleWithdrawButtonClick);
+    button.addEventListener("click", handleUpdateConnectedButtonClick);
   }
 }
 
-async function handleWithdrawButtonClick() {
-  console.log("REABILITY: Withdraw button clicked");
+async function handleUpdateConnectedButtonClick() {
+  console.log("REABILITY: Update Connected button clicked");
 
-  while (true) {
-    const buttons = await waitForXPath(
-      "//div[contains(@class, 'invitation-card__container')][.//span[contains(@class, 'time-badge') and contains(., 'month')]]//button[span[text()='Withdraw']]",
+  try {
+    const nodes = await waitForXPath(
+      "//section[contains(@class, 'mn-connections')]//li//a",
       3000
     );
 
-    if (!buttons || buttons.length === 0) {
-      console.log("No more withdrawal buttons found, stopping.");
-      break;
+    // Create a Set to store unique hrefs
+    const uniqueHrefs = new Set();
+
+    // Iterate over the nodes and extract hrefs
+    for (const node of nodes) {
+      if (node.href) {
+        uniqueHrefs.add(node.href);
+      }
     }
 
-    buttons[0].click();
-
-    const withdrawDialogButton = await waitForXPath(
-      "//div[@data-test-modal and @role='alertdialog']//span[text()='Withdraw']",
-      3000
+    // Create the JSON array
+    const jsonArray = Array.from(uniqueHrefs).map(
+      (href) => `https://linkedin.com${new URL(href).pathname}`
     );
 
-    if (withdrawDialogButton && withdrawDialogButton.length > 0) {
-      withdrawDialogButton[0].click();
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second before the next iteration
+    // Output the JSON array
+    const jsonString = JSON.stringify(jsonArray, null, 2);
+    console.log(jsonString);
+    return jsonString;
+  } catch (error) {
+    console.error("Error finding profiles:", error);
   }
 }
 
 injectHTMLAndCSS("linkedin.html", null, "#reabilityDrawerContent")
   .then(() => {
-    setupWithdrawButton();
+    setupUpdateConnectedButton();
   })
   .catch((error) => {
     console.error("REABILITY: Error setting up Linkedin HTML and CSS:", error);
