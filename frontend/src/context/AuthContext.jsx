@@ -1,10 +1,9 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   auth,
   googleProvider,
   onAuthStateChanged,
-} from "../config/firebaseConfig";
+} from "../helpers/firebaseConfig";
 import { signInWithPopup, signOut } from "firebase/auth";
 
 const AuthContext = createContext();
@@ -43,3 +42,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+export { AuthContext };

@@ -10,14 +10,16 @@ const ToolbarComponent = () => {
   return (
     <AppBar position="static">
       <Toolbar className="toolbar">
-        <IconButton
-          edge="start"
-          color="inherit"
-          aria-label="menu"
-          className="menu-icon"
-        >
-          <MenuIcon />
-        </IconButton>
+        {user && (
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            className="menu-icon"
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
         <Typography variant="h6" component="div" className="toolbar-title">
           Truffle Dog Digital CRM
         </Typography>
