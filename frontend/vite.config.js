@@ -22,4 +22,7 @@ export default defineConfig({
       usePolling: true,
     },
   },
+  build: {
+    outDir: resolve(__dirname, "./dist"),
+  },
 });

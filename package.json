@@ -1,7 +1,7 @@
 {
-  "name": "spent",
-  "version": "1.0.0",
-  "description": "Personal spend tracking app",
+  "name": "truffle-dog-crm",
+  "version": "4.0",
+  "description": "Truffle Dog CRM",
   "scripts": {
     "local": "cross-env VITE_LOCAL_DEV=true dotenv -e .env -- sh -c 'concurrently \"cd frontend && npm run local\" \"firebase emulators:start --project $FIREBASE_PROJECT_ID\"'",
     "deploy": "firebase deploy",
