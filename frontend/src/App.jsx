@@ -5,7 +5,7 @@ import ToolbarComponent from "./components/ToolbarComponent";
 import PasteHandler from "./components/PasteHandler";
 import HumansPage from "./pages/HumansPage";
 import BacklogPage from "./pages/BacklogPage";
-import "./App.css";
+import { CssBaseline, Container } from "@mui/material";
 
 const AppContent = () => {
   const { user } = useAuth();
@@ -13,15 +13,17 @@ const AppContent = () => {
   return (
     <>
       <ToolbarComponent />
-      {user ? (
-        <Routes>
-          <Route path="/humans" element={<HumansPage />} />
-          <Route path="/backlog" element={<BacklogPage />} />
-          <Route path="/" element={<HumansPage />} />
-        </Routes>
-      ) : (
-        <div />
-      )}
+      <Container style={{ marginTop: "64px" }}>
+        {user ? (
+          <Routes>
+            <Route path="/humans" element={<HumansPage />} />
+            <Route path="/backlog" element={<BacklogPage />} />
+            <Route path="/" element={<HumansPage />} />
+          </Routes>
+        ) : (
+          <div />
+        )}
+      </Container>
     </>
   );
 };
@@ -29,6 +31,7 @@ const AppContent = () => {
 const App = () => {
   return (
     <AuthProvider>
+      <CssBaseline />
       <PasteHandler />
       <Router>
         <AppContent />
