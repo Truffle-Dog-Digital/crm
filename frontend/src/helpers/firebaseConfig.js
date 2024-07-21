@@ -3,9 +3,15 @@ import {
   getAuth,
   connectAuthEmulator,
   onAuthStateChanged,
-  GoogleAuthProvider, // Add GoogleAuthProvider here
+  GoogleAuthProvider,
 } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import {
+  getFirestore,
+  connectFirestoreEmulator,
+  collection,
+  getDocs,
+  addDoc,
+} from "firebase/firestore";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 // Initialize Firebase
@@ -20,7 +26,7 @@ const firebaseConfig = {
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider(); // Ensure this is included
+const googleProvider = new GoogleAuthProvider();
 const db = getFirestore(app);
 const functions = getFunctions(app);
 
@@ -30,5 +36,13 @@ if (window.location.hostname === "localhost") {
   connectFirestoreEmulator(db, "localhost", 8085); // Firestore running on port 8085
   connectFunctionsEmulator(functions, "localhost", 5001);
 }
+
+// Expose Firestore functions and db to the global window object
+window.firebase = {
+  db,
+  collection,
+  getDocs,
+  addDoc,
+};
 
 export { app, auth, db, functions, onAuthStateChanged, googleProvider };
