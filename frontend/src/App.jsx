@@ -5,6 +5,7 @@ import ToolbarComponent from "./components/ToolbarComponent";
 import PasteHandler from "./components/PasteHandler";
 import HumansPage from "./pages/HumansPage";
 import BacklogPage from "./pages/BacklogPage";
+import "./App.css";
 
 const AppContent = () => {
   const { user } = useAuth();
