@@ -6,7 +6,7 @@ const linkedinGrabProfileDetails = require("./linkedinGrabProfileDetails");
 const linkedinConnect = require("./linkedinConnect");
 
 // Configuration
-const testMode = false;
+const testMode = true;
 const headless = false;
 const inputFileCookies = "linkedinCookies.json";
 const inputFileProfiles = "profilesIn.txt";
@@ -40,7 +40,9 @@ const log = (message) => {
   const cleanedCookies = await linkedinCleanCookies(inputFileCookies);
 
   // Read LinkedIn profile URLs from profiles.txt
-  const profiles = (await fs.readFile(inputFileProfiles, "utf8")).split("\n");
+  const profiles = (await fs.readFile(inputFileProfiles, "utf8"))
+    .split("\n")
+    .filter((line) => line.trim() !== "");
 
   // Read custom connection text from customConnection.txt
   const customText = await fs.readFile(inputFileCustomText, "utf8");

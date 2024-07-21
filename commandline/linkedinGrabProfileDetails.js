@@ -58,7 +58,14 @@ async function linkedinGrabProfileDetails(page, profile, customText, log) {
 
       roles.push({ company, position });
     }
-    const requestSent = new Date().toISOString().split("T")[0]; // Format as YYYY-MM-DD
+    const options = {
+      timeZone: "Australia/Sydney",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    };
+
+    const requestSent = new Date().toLocaleDateString("en-CA", options); // 'en-CA' gives the format YYYY-MM-DD
 
     return { name, requestSent, profile, customText, roles };
   } catch (error) {
