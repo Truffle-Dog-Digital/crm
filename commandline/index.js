@@ -6,7 +6,7 @@ const linkedinGrabProfileDetails = require("./linkedinGrabProfileDetails");
 const linkedinConnect = require("./linkedinConnect");
 
 // Configuration
-const testMode = true;
+const testMode = false;
 const headless = false;
 const inputFileCookies = "linkedinCookies.json";
 const inputFileProfiles = "profilesIn.txt";

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Table,
   TableBody,
@@ -11,122 +11,38 @@ import {
   Checkbox,
   Toolbar,
   Typography,
-  Box,
   IconButton,
   Tooltip,
+  Box,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import useHumans from "../context/useHumans";
+import useHumansTable from "./useHumansTable";
 
-const descendingComparator = (a, b, orderBy) => {
-  if (b[orderBy] < a[orderBy]) return -1;
-  if (b[orderBy] > a[orderBy]) return 1;
-  return 0;
-};
-
-const getComparator = (order, orderBy) => {
-  return order === "desc"
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-};
-
-const stableSort = (array, comparator) => {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-};
-
-const HumansTable = ({ humans }) => {
-  const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("name");
-  const [selected, setSelected] = useState([]);
-
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
-  };
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = humans.map((n) => n.id);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-
-  const handleClick = (event, id) => {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
-    }
-
-    setSelected(newSelected);
-  };
-
-  const isSelected = (id) => selected.indexOf(id) !== -1;
+const HumansTable = () => {
+  const humans = useHumans();
+  const {
+    order,
+    orderBy,
+    selected,
+    handleRequestSort,
+    handleSelectAllClick,
+    handleClick,
+    isSelected,
+    stableSort,
+    getComparator,
+  } = useHumansTable();
 
   return (
-    <Paper sx={{ width: "100%", mb: 2 }}>
-      <Toolbar
-        sx={{
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
-          ...(selected.length > 0 && {
-            bgcolor: (theme) => theme.palette.action.selected,
-          }),
-        }}
-      >
-        {selected.length > 0 ? (
-          <Typography
-            sx={{ flex: "1 1 100%" }}
-            color="inherit"
-            variant="subtitle1"
-            component="div"
-          >
-            {selected.length} selected
-          </Typography>
-        ) : (
-          <Typography
-            sx={{ flex: "1 1 100%" }}
-            variant="h6"
-            id="tableTitle"
-            component="div"
-          >
-            Humans
-          </Typography>
-        )}
-        {selected.length > 0 ? (
-          <Tooltip title="Delete">
-            <IconButton>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <Tooltip title="Filter list">
-            <IconButton>
-              <FilterListIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-      </Toolbar>
-      <TableContainer>
+    <Paper
+      sx={{
+        width: "100%",
+        height: "calc(100vh - 64px)",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <TableContainer sx={{ flex: 1, overflowY: "auto" }}>
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
@@ -139,7 +55,7 @@ const HumansTable = ({ humans }) => {
                   checked={
                     humans.length > 0 && selected.length === humans.length
                   }
-                  onChange={handleSelectAllClick}
+                  onChange={(event) => handleSelectAllClick(event, humans)}
                   inputProps={{
                     "aria-label": "select all humans",
                   }}
@@ -205,6 +121,7 @@ const HumansTable = ({ humans }) => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Box sx={{ height: "64px" }} />
     </Paper>
   );
 };
