@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import ToolbarComponent from "./components/ToolbarComponent";
 import PasteHandler from "./components/PasteHandler";
 import HumansPage from "./pages/HumansPage";
-import BacklogPage from "./pages/BacklogPage";
+import BacklogsPage from "./pages/BacklogsPage";
 import { CssBaseline, Container } from "@mui/material";
 
 const AppContent = () => {
@@ -17,7 +17,7 @@ const AppContent = () => {
         {user ? (
           <Routes>
             <Route path="/humans" element={<HumansPage />} />
-            <Route path="/backlog" element={<BacklogPage />} />
+            <Route path="/backlog" element={<BacklogsPage />} />
             <Route path="/" element={<HumansPage />} />
           </Routes>
         ) : (
