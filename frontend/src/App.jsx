@@ -32,8 +32,8 @@ const App = () => {
   return (
     <AuthProvider>
       <CssBaseline />
-      <PasteHandler />
       <Router>
+        <PasteHandler />
         <AppContent />
       </Router>
     </AuthProvider>

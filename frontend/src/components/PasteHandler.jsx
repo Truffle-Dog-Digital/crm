@@ -1,15 +1,23 @@
 import React, { useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { addHumans } from "../services/addHumans";
+import { useLocation } from "react-router-dom";
 
 const PasteHandler = () => {
   const { user } = useContext(AuthContext);
+  const location = useLocation();
 
   useEffect(() => {
     const handlePasteEvent = async (event) => {
       try {
         if (!user) {
           console.log("User not logged in, doing nothing");
+          return;
+        }
+
+        // Check if the current route is /humans
+        if (location.pathname !== "/humans") {
+          console.log("Not in humans route, doing nothing");
           return;
         }
 
@@ -37,7 +45,7 @@ const PasteHandler = () => {
     return () => {
       window.removeEventListener("paste", handlePasteEvent);
     };
-  }, [user]);
+  }, [user, location]);
 
   return null;
 };
