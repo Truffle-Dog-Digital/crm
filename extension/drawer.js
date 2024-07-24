@@ -5,8 +5,8 @@ function injectDrawer() {
   injectHTMLAndCSS("drawer.html", "drawer.css", "body")
     .then(() => {
       setupDrawerCloseButton();
-      setupProductionSwitch(); // Set up the event listener for the switch after the drawer is injected
-      document.body.classList.add("reabilityDrawerOpen"); // Adjust body margin when drawer is injected
+      setupProductionSwitch();
+      document.body.classList.add("reabilityDrawerOpen");
     })
     .catch((error) => console.error(error));
 }
@@ -15,9 +15,13 @@ function setupProductionSwitch() {
   const productionSwitch = document.getElementById("productionSwitch");
 
   if (productionSwitch) {
-    // Add event listener for state changes
     productionSwitch.addEventListener("change", function () {
+      // Update the global variable and send same state to the background script
       isProduction = this.checked;
+      chrome.runtime.sendMessage({
+        action: "updateIsProduction",
+        isProduction: isProduction,
+      });
       console.log("Production Switch is " + (isProduction ? "ON" : "OFF"));
     });
   }
