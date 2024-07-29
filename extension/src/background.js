@@ -1,19 +1,21 @@
+import { initializeFirebaseApp } from "./background-init.js";
+
+const { app, auth } = initializeFirebaseApp();
+
 let isProduction = false;
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("RExtension installed");
+  console.log("REABILITY: Extension installed");
 });
 
 chrome.runtime.onMessage.addListener(
   (scriptRequest, scriptSender, scriptResponse) => {
-    console.log("Received script message", scriptRequest);
+    console.log("REABILITY: Received script message", scriptRequest);
 
     if (scriptRequest.action === "updateIsProduction") {
       isProduction = scriptRequest.isProduction;
       console.log(
-        "Production switch is " +
-          (isProduction ? "ON" : "OFF") +
-          " in background script"
+        "REABILITY: Production switch is " + (isProduction ? "ON" : "OFF")
       );
       return;
     }
