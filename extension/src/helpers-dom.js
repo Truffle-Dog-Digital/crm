@@ -1,5 +1,4 @@
-// Helper function to wait for all elements using XPath
-async function waitForXPath(xpath, timeout = 3000) {
+export async function waitForXPath(xpath, timeout = 3000) {
   return new Promise((resolve) => {
     const intervalTime = 100;
     let elapsedTime = 0;
@@ -28,8 +27,7 @@ async function waitForXPath(xpath, timeout = 3000) {
   });
 }
 
-// Function to wait for an element to disappear using XPath
-function waitForXPathToDisappear(xpath, timeout = 3000) {
+export function waitForXPathToDisappear(xpath, timeout = 3000) {
   return new Promise((resolve, reject) => {
     const intervalTime = 100;
     let elapsedTime = 0;
@@ -56,7 +54,7 @@ function waitForXPathToDisappear(xpath, timeout = 3000) {
   });
 }
 
-function waitForElement(selector, timeout = 3000) {
+export function waitForElement(selector, timeout = 3000) {
   return new Promise((resolve, reject) => {
     const intervalTime = 100;
     let elapsedTime = 0;
@@ -79,7 +77,7 @@ function waitForElement(selector, timeout = 3000) {
   });
 }
 
-function injectHTMLAndCSS(htmlPath, cssPath, injectInto) {
+export function injectHTMLAndCSS(htmlPath, cssPath, injectInto) {
   return waitForElement(injectInto).then((injectTarget) => {
     return new Promise((resolve, reject) => {
       const fetchCSS = cssPath

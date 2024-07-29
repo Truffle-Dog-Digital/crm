@@ -1,4 +1,4 @@
-function setLocalStorage(key, value) {
+export function setLocalStorage(key, value) {
   try {
     const result = new Promise((resolve, reject) => {
       chrome.storage.local.set({ [key]: value }, () => {
@@ -27,7 +27,7 @@ function setLocalStorage(key, value) {
   }
 }
 
-function getLocalStorage(key) {
+export function getLocalStorage(key) {
   try {
     const result = new Promise((resolve, reject) => {
       chrome.storage.local.get([key], (data) => {

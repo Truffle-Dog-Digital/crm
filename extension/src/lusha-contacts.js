@@ -1,3 +1,14 @@
+import { injectHTMLAndCSS } from "./helpers-dom.js";
+import { setLocalStorage, getLocalStorage } from "./helpers-localStorage.js";
+import {
+  injectDrawer,
+  setupProductionSwitch,
+  setupDrawerCloseButton,
+} from "./drawer.js";
+
+// Global variable to store the state of the production switch
+var isProduction = false;
+
 function setupGrabButton() {
   const grabButton = document.getElementById("reabilityLushaListGrab");
   if (grabButton) {
@@ -92,7 +103,10 @@ async function copyToClipboard(text) {
   }
 }
 
-// Initialize and inject the HTML and CSS
+injectDrawer();
+setupProductionSwitch();
+setupDrawerCloseButton();
+
 injectHTMLAndCSS("lusha-contacts.html", null, "#reabilityDrawerContent")
   .then(() => {
     setupGrabButton();

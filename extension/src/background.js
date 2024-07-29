@@ -1,7 +1,7 @@
-var isProduction = false;
+let isProduction = false;
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("Extension installed");
+  console.log("RExtension installed");
 });
 
 chrome.runtime.onMessage.addListener(
@@ -11,7 +11,7 @@ chrome.runtime.onMessage.addListener(
     if (scriptRequest.action === "updateIsProduction") {
       isProduction = scriptRequest.isProduction;
       console.log(
-        "Production Switch is " +
+        "Production switch is " +
           (isProduction ? "ON" : "OFF") +
           " in background script"
       );

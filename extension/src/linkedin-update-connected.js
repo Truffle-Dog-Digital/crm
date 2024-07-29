@@ -1,3 +1,13 @@
+import { injectHTMLAndCSS, waitForXPath } from "./helpers-dom.js";
+import {
+  injectDrawer,
+  setupProductionSwitch,
+  setupDrawerCloseButton,
+} from "./drawer.js";
+
+// Global variable to store the state of the production switch
+var isProduction = false;
+
 function setupUpdateConnectedButton() {
   const button = document.getElementById("reabilityUpdateConnected");
   if (button) {
@@ -38,7 +48,17 @@ async function handleUpdateConnectedButtonClick() {
   }
 }
 
-injectHTMLAndCSS("linkedin.html", null, "#reabilityDrawerContent")
+// Inject the drawer HTML and CSS, and setup drawer functionality
+injectDrawer();
+setupProductionSwitch();
+setupDrawerCloseButton();
+
+// Initialize and inject the HTML and CSS, and setup buttons
+injectHTMLAndCSS(
+  "linkedin-update-connected.html",
+  null,
+  "#reabilityDrawerContent"
+)
   .then(() => {
     setupUpdateConnectedButton();
   })

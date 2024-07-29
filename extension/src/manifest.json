@@ -3,44 +3,30 @@
   "name": "Truffle Dog Digital CRM",
   "description": "Mostly automation for cut/paste in CRM tasks.",
   "version": "3.0",
-  "permissions": ["activeTab", "tabs", "storage"],
+  "permissions": ["activeTab", "tabs", "storage", "cookies"],
   "host_permissions": [
-    "*://api.lemlist.com/*",
     "*://dashboard.lusha.com/*",
-    "*://www.linkedin.com/*"
+    "*://www.linkedin.com/*",
+    "*://truffledog-crm-prod.firebaseapp.com/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.bundle.js",
+    "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["*://dashboard.lusha.com/prospecting/contacts*"],
-      "js": [
-        "helpers-dom.js",
-        "helpers-localStorage.js",
-        "drawer.js",
-        "lusha-contacts.js"
-      ],
+      "js": ["lusha-contacts.bundle.js"],
       "run_at": "document_end"
     },
     {
       "matches": ["*://www.linkedin.com/mynetwork/invitation-manager/sent*"],
-      "js": [
-        "helpers-dom.js",
-        "helpers-localStorage.js",
-        "drawer.js",
-        "linkedin-withdraw.js"
-      ],
+      "js": ["linkedin-withdraw.bundle.js"],
       "run_at": "document_end"
     },
     {
       "matches": ["*://www.linkedin.com/mynetwork/invite-connect/connections*"],
-      "js": [
-        "helpers-dom.js",
-        "helpers-localStorage.js",
-        "drawer.js",
-        "linkedin-update-connected.js"
-      ],
+      "js": ["linkedin-update-connected.bundle.js"],
       "run_at": "document_end"
     }
   ],
@@ -50,7 +36,12 @@
       "matches": ["*://dashboard.lusha.com/*"]
     },
     {
-      "resources": ["drawer.html", "drawer.css", "linkedin.html"],
+      "resources": [
+        "drawer.html",
+        "drawer.css",
+        "linkedin-withdraw.html",
+        "linkedin-update-connected.html"
+      ],
       "matches": ["*://www.linkedin.com/*"]
     }
   ],
@@ -59,5 +50,8 @@
     "32": "crm-32.png",
     "48": "crm-48.png",
     "128": "crm-128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
   }
 }

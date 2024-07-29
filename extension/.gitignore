@@ -33,6 +33,9 @@ bower_components
 # dotenv environment variables file
 .env
 
+# firebase config isn't sensitive, but messy to have mine in there
+firebaseConfig.js
+
 # Editor directories and files
 .idea
 *.suo

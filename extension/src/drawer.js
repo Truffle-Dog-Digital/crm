@@ -1,5 +1,4 @@
-// Global variable to store the state of the production switch
-var isProduction = false;
+import { injectHTMLAndCSS } from "./helpers-dom.js";
 
 function injectDrawer() {
   injectHTMLAndCSS("drawer.html", "drawer.css", "body")
@@ -16,13 +15,13 @@ function setupProductionSwitch() {
 
   if (productionSwitch) {
     productionSwitch.addEventListener("change", function () {
-      // Update the global variable and send same state to the background script
-      isProduction = this.checked;
       chrome.runtime.sendMessage({
         action: "updateIsProduction",
-        isProduction: isProduction,
+        isProduction: this.checked,
       });
-      console.log("Production Switch is " + (isProduction ? "ON" : "OFF"));
+      console.log(
+        "REABILITY: Production switch is " + (this.checked ? "ON" : "OFF")
+      );
     });
   }
 }
@@ -34,10 +33,10 @@ function setupDrawerCloseButton() {
       const drawer = document.getElementById("reabilityDrawer");
       if (drawer) {
         drawer.style.display = "none";
-        document.body.classList.remove("reabilityDrawerOpen"); // Remove body margin adjustment when drawer is closed
+        document.body.classList.remove("reabilityDrawerOpen");
       }
     });
   }
 }
 
-injectDrawer();
+export { injectDrawer, setupProductionSwitch, setupDrawerCloseButton };
