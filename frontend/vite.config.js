@@ -24,5 +24,6 @@ export default defineConfig({
   },
   build: {
     outDir: resolve(__dirname, "./dist"),
+    emptyOutDir: true, // Ensure the dist directory is cleared before each build
   },
 });
