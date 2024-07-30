@@ -1,5 +1,3 @@
-// import { initializeFirebaseApp } from "./background-init.js";
-
 let isProduction = false;
 
 chrome.runtime.onInstalled.addListener(() => {
