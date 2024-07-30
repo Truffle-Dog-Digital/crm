@@ -1,5 +1,5 @@
 import { injectHTMLAndCSS } from "./helpers-dom.js";
-import { setLocalStorage, getLocalStorage } from "./helpers-localStorage.js";
+import { copyToClipboard, clearClipboard } from "./helpers-clipboard.js";
 import {
   injectDrawer,
   setupProductionSwitch,
@@ -9,31 +9,28 @@ import {
 // Global variable to store the state of the production switch
 var isProduction = false;
 
-function setupGrabButton() {
-  const grabButton = document.getElementById("reabilityLushaListGrab");
-  if (grabButton) {
-    grabButton.addEventListener("click", handleLushaListGrabClick);
-  }
+console.log("REABILITY: Lusha Contacts: 01");
+
+function setupClipboardListener() {
+  document.addEventListener("copy", handleClipboardCopy);
 }
 
-function setupClearButton() {
-  const clearButton = document.getElementById("clearProfiles");
-  if (clearButton) {
-    clearButton.addEventListener("click", handleClearProfilesClick);
-  }
-}
-
-// Function to handle Grab Contacts button click
-async function handleLushaListGrabClick() {
-  console.log("REABILITY: Grab Contacts button clicked");
+// Function to handle clipboard copy event
+async function handleClipboardCopy(event) {
+  console.log("REABILITY: Clipboard copy detected");
   const linkedinUrls = await getLushaContacts();
   console.log("REABILITY: Found LinkedIn URLs", linkedinUrls);
-  await appendLinkedInUrlsToStorage(linkedinUrls);
-  const allUrls = await getLocalStorage("REABILITY_PROFILES");
-  console.log("REABILITY: All LinkedIn URLs in storage", allUrls);
-  const lineDelimitedUrls = allUrls.join("\n");
-  await copyToClipboard(lineDelimitedUrls);
-  console.log("REABILITY: Line delimited URLs", lineDelimitedUrls);
+  const lineDelimitedUrls = linkedinUrls.join("\n");
+  if (linkedinUrls.length > 0) {
+    await copyToClipboard(lineDelimitedUrls);
+    console.log(
+      "REABILITY: Line delimited URLs copied to clipboard",
+      lineDelimitedUrls
+    );
+  } else {
+    await clearClipboard();
+    console.log("REABILITY: No contacts found, clipboard cleared");
+  }
 }
 
 // Function to get selected Lusha contacts
@@ -56,61 +53,13 @@ async function getLushaContacts() {
   return linkedinUrls;
 }
 
-// Function to append LinkedIn URLs to local storage
-async function appendLinkedInUrlsToStorage(newUrls) {
-  const existingUrls = (await getLocalStorage("REABILITY_PROFILES")) || [];
-  const updatedUrls = [...existingUrls, ...newUrls];
-  await setLocalStorage("REABILITY_PROFILES", updatedUrls);
-}
-
-// Function to handle Clear Profiles button click
-async function handleClearProfilesClick() {
-  console.log("REABILITY: Clear Profiles button clicked");
-  await clearLinkedInUrlsFromStorage();
-  await clearClipboard();
-}
-
-// Function to clear LinkedIn URLs from local storage
-async function clearLinkedInUrlsFromStorage() {
-  try {
-    await setLocalStorage("REABILITY_PROFILES", []);
-    console.log("REABILITY: LinkedIn URLs cleared from storage");
-  } catch (error) {
-    console.error(
-      "REABILITY: Error clearing LinkedIn URLs from storage",
-      error
-    );
-  }
-}
-
-// Function to clear the clipboard
-async function clearClipboard() {
-  try {
-    await navigator.clipboard.writeText("");
-    console.log("REABILITY: Clipboard cleared");
-  } catch (error) {
-    console.error("REABILITY: Error clearing the clipboard", error);
-  }
-}
-
-// Function to copy text to clipboard
-async function copyToClipboard(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-    console.log("REABILITY: Text copied to clipboard");
-  } catch (error) {
-    console.error("REABILITY: Error copying text to clipboard", error);
-  }
-}
-
 injectDrawer();
 setupProductionSwitch();
 setupDrawerCloseButton();
 
 injectHTMLAndCSS("lusha-contacts.html", null, "#reabilityDrawerContent")
   .then(() => {
-    setupGrabButton();
-    setupClearButton();
+    setupClipboardListener();
   })
   .catch((error) => {
     console.error("REABILITY: Error setting up Lusha HTML and CSS:", error);

@@ -8,6 +8,8 @@ import {
 // Global variable to store the state of the production switch
 var isProduction = false;
 
+console.log("REABILITY: Linkedin Update Connected: 01");
+
 function setupUpdateConnectedButton() {
   const button = document.getElementById("reabilityUpdateConnected");
   if (button) {
@@ -41,7 +43,7 @@ async function handleUpdateConnectedButtonClick() {
 
     // Output the JSON array
     const jsonString = JSON.stringify(jsonArray, null, 2);
-    console.log(jsonString);
+    console.log("REABILITY: \n" + jsonString);
     return jsonString;
   } catch (error) {
     console.error("Error finding profiles:", error);

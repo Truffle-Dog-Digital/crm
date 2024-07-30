@@ -1,3 +1,5 @@
+// these helpers not currently used, left in case I need them again soon
+
 export function setLocalStorage(key, value) {
   try {
     const result = new Promise((resolve, reject) => {
