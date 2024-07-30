@@ -1,4 +1,5 @@
 import { injectHTMLAndCSS, waitForXPath } from "./helpers-dom.js";
+import { copyToClipboard, clearClipboard } from "./helpers-clipboard.js";
 import {
   injectDrawer,
   setupProductionSwitch,
@@ -8,17 +9,31 @@ import {
 // Global variable to store the state of the production switch
 var isProduction = false;
 
-console.log("REABILITY: Linkedin Update Connected: 01");
+console.log("REABILITY: Linkedin Update Connected: 03");
 
-function setupUpdateConnectedButton() {
-  const button = document.getElementById("reabilityUpdateConnected");
-  if (button) {
-    button.addEventListener("click", handleUpdateConnectedButtonClick);
+function setupClipboardListener() {
+  document.addEventListener("copy", handleClipboardCopy);
+}
+
+// Function to handle clipboard copy event
+async function handleClipboardCopy(event) {
+  console.log("REABILITY: Clipboard copy detected");
+  const linkedinUrls = await getLinkedinConnections();
+  const lineDelimitedUrls = linkedinUrls.join("\n");
+  if (linkedinUrls.length > 0) {
+    await copyToClipboard(lineDelimitedUrls);
+    console.log(
+      "REABILITY: Line delimited URLs copied to clipboard",
+      lineDelimitedUrls
+    );
+  } else {
+    await clearClipboard();
+    console.log("REABILITY: No connections found, clipboard cleared");
   }
 }
 
-async function handleUpdateConnectedButtonClick() {
-  console.log("REABILITY: Update Connected button clicked");
+async function getLinkedinConnections() {
+  console.log("REABILITY: Getting LinkedIn connections");
 
   try {
     const nodes = await waitForXPath(
@@ -36,33 +51,30 @@ async function handleUpdateConnectedButtonClick() {
       }
     }
 
-    // Create the JSON array
-    const jsonArray = Array.from(uniqueHrefs).map(
+    // Convert the Set to an array of plain URLs
+    const urlsArray = Array.from(uniqueHrefs).map(
       (href) => `https://linkedin.com${new URL(href).pathname}`
     );
 
-    // Output the JSON array
-    const jsonString = JSON.stringify(jsonArray, null, 2);
-    console.log("REABILITY: \n" + jsonString);
-    return jsonString;
+    return urlsArray;
   } catch (error) {
     console.error("Error finding profiles:", error);
+    return [];
   }
 }
 
-// Inject the drawer HTML and CSS, and setup drawer functionality
 injectDrawer();
 setupProductionSwitch();
 setupDrawerCloseButton();
 
-// Initialize and inject the HTML and CSS, and setup buttons
+// Initialize and inject the HTML and CSS, and setup clipboard listener
 injectHTMLAndCSS(
   "linkedin-update-connected.html",
   null,
   "#reabilityDrawerContent"
 )
   .then(() => {
-    setupUpdateConnectedButton();
+    setupClipboardListener();
   })
   .catch((error) => {
     console.error("REABILITY: Error setting up Linkedin HTML and CSS:", error);
