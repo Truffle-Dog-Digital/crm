@@ -1,12 +1,8 @@
 const fs = require("fs").promises;
 const { waitForElementToDisappear } = require("./puppeteerSetup");
 
-// Function to delay actions
-const delay = (timeout) =>
-  new Promise((resolve) => setTimeout(resolve, timeout));
-
 // Assumes you're already on the LinkedIn profile page and the "Connect" button DOM element is loaded
-async function linkedinConnect(testMode, profile, page, customText, log) {
+async function linkedinConnect(testMode, profile, page, customText) {
   try {
     let connectButton = null;
     // Locate the "Connect" button using a CSS selector
@@ -15,7 +11,7 @@ async function linkedinConnect(testMode, profile, page, customText, log) {
         'xpath///div[contains(@class, "ph5")]//span[text()="Connect"]'
       );
     } catch (error) {
-      log(`No connect button: ${profile}`);
+      console.log(`No connect button: ${profile}`);
       return false;
     }
 
@@ -36,9 +32,6 @@ async function linkedinConnect(testMode, profile, page, customText, log) {
         // Enter the message in the textarea
         await page.type("#custom-message", customText);
 
-        // Wait for 3 seconds to observe the result
-        // await delay(3000);
-
         if (testMode) {
           // Click the dismiss "x" button and wait for it to disappear
           const dismissButton = await page.waitForSelector(
@@ -51,7 +44,7 @@ async function linkedinConnect(testMode, profile, page, customText, log) {
               page,
               'button[aria-label="Dismiss"]'
             );
-            log(`Dismissed invitation: ${profile}`);
+            console.log(`Dismissed invitation: ${profile}`);
           }
         } else {
           // Click the "Send invitation" button and wait for it to disappear
@@ -65,18 +58,18 @@ async function linkedinConnect(testMode, profile, page, customText, log) {
               page,
               'button[aria-label="Dismiss"]'
             );
-            log(`Sent invitation: ${profile}`);
+            console.log(`Sent invitation: ${profile}`);
           }
         }
 
         return true;
       }
     } else {
-      log(`No connect button found`);
+      console.log(`No connect button found`);
       return false;
     }
   } catch (error) {
-    log(`Catch-all inside linkedinConnect: ${error.message}`);
+    console.log(`Catch-all inside linkedinConnect: ${error.message}`);
     return false;
   }
 }

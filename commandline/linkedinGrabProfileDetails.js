@@ -1,4 +1,4 @@
-async function linkedinGrabProfileDetails(page, profile, customText, log) {
+async function linkedinGrabProfileDetails(page, profile, customText) {
   try {
     // Just in case the page loads slowly, wait for the experience section
     await page.waitForSelector('xpath///section[.//div[@id="experience"]]');
@@ -69,7 +69,7 @@ async function linkedinGrabProfileDetails(page, profile, customText, log) {
 
     return { name, requestSent, profile, customText, roles };
   } catch (error) {
-    log(`Error with: ${profile} -- ${error.message}`);
+    console.log(`Error with: ${profile} -- ${error.message}`);
     return false;
   }
 }

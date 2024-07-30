@@ -1,7 +1,5 @@
 const puppeteer = require("puppeteer-core");
 
-const headless = true; // Set headless to true
-
 // Function to create a browser and set up a new page with cookies
 async function createPage(cleanedCookies, headless) {
   const browser = await puppeteer.launch({
@@ -21,7 +19,7 @@ async function createPage(cleanedCookies, headless) {
 
 // Function to wait for the disappearance of an element
 async function waitForElementToDisappear(page, selector) {
-  const timeout = 10000; // 10 secs
+  const timeout = 3000; // 3 secs
   const start = Date.now();
   while (Date.now() - start < timeout) {
     const element = await page.$(selector);

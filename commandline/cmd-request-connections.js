@@ -6,33 +6,20 @@ const linkedinGrabProfileDetails = require("./linkedinGrabProfileDetails");
 const linkedinConnect = require("./linkedinConnect");
 
 // Configuration
-const testMode = false;
+const testMode = true;
 const headless = false;
 const inputFileCookies = "linkedinCookies.json";
-const inputFileProfiles = "profilesIn.txt";
-const outputPeopleConnected = "profilesOutConected.txt";
-const outputProfilesNotConnected = "profilesOutNotConnected.txt";
-const inputFileCustomText = "linkedinCustomConnection.txt";
-const outputFileLog = "connect.log";
-const logTo = ["console", "file"];
+const profilesInRequested = "profilesInRequested.txt";
+const profilesOutRequested = "profilesOutRequested.txt";
+const profilesOutNotRequested = "profilesOutNotRequested.txt";
+const linkedinCustomConnectionText = "linkedinCustomConnectionText.txt";
 
 // Set up output files/streams
-const logStream = syncFs.createWriteStream(outputFileLog);
-const peopleConnectedStream = syncFs.createWriteStream(outputPeopleConnected);
-const profilesNotConnectedStream = syncFs.createWriteStream(
-  outputProfilesNotConnected
+const profilesOutRequestedStream =
+  syncFs.createWriteStream(profilesOutRequested);
+const profilesOutNotRequestedStream = syncFs.createWriteStream(
+  profilesOutNotRequested
 );
-
-// Function to log messages
-const log = (message) => {
-  const timestamp = `${new Date().toISOString()} - ${message}\n`;
-  if (logTo.includes("console")) {
-    console.log(message);
-  }
-  if (logTo.includes("file")) {
-    logStream.write(timestamp);
-  }
-};
 
 // Main function
 (async () => {
@@ -40,12 +27,12 @@ const log = (message) => {
   const cleanedCookies = await linkedinCleanCookies(inputFileCookies);
 
   // Read LinkedIn profile URLs from profiles.txt
-  const profiles = (await fs.readFile(inputFileProfiles, "utf8"))
+  const profiles = (await fs.readFile(profilesInRequested, "utf8"))
     .split("\n")
     .filter((line) => line.trim() !== "");
 
   // Read custom connection text from customConnection.txt
-  const customText = await fs.readFile(inputFileCustomText, "utf8");
+  const customText = await fs.readFile(linkedinCustomConnectionText, "utf8");
 
   const { browser, page } = await createPage(cleanedCookies, headless);
 
@@ -56,8 +43,7 @@ const log = (message) => {
       const profileDetails = await linkedinGrabProfileDetails(
         page,
         profile,
-        customText,
-        log
+        customText
       );
 
       if (profileDetails) {
@@ -65,28 +51,28 @@ const log = (message) => {
           testMode,
           profile,
           page,
-          customText,
-          log
+          customText
         );
 
         if (connected) {
-          peopleConnectedStream.write(`${JSON.stringify(profileDetails)}\n`);
+          profilesOutRequestedStream.write(
+            `${JSON.stringify(profileDetails)}\n`
+          );
         } else {
-          profilesNotConnectedStream.write(`${profile}\n`);
+          profilesOutNotRequestedStream.write(`${profile}\n`);
         }
       } else {
-        profilesNotConnectedStream.write(`${profile}\n`);
+        profilesOutNotRequestedStream.write(`${profile}\n`);
       }
     } catch (error) {
-      log(
+      console.log(
         `Catch-all around grabbing profile details and connecting: ${error.message}`
       );
-      profilesNotConnectedStream.write(`${profile}\n`);
+      profilesOutNotRequestedStream.write(`${profile}\n`);
     }
   }
 
   await browser.close();
-  logStream.end();
-  peopleConnectedStream.end();
-  profilesNotConnectedStream.end();
+  profilesOutRequestedStream.end();
+  profilesOutNotRequestedStream.end();
 })();
