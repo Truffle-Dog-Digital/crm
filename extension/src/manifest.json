@@ -4,11 +4,7 @@
   "description": "Mostly automation for cut/paste in CRM tasks.",
   "version": "3.0",
   "permissions": ["activeTab", "tabs", "storage", "cookies"],
-  "host_permissions": [
-    "*://dashboard.lusha.com/*",
-    "*://www.linkedin.com/*",
-    "*://truffledog-crm-prod.firebaseapp.com/*"
-  ],
+  "host_permissions": ["*://dashboard.lusha.com/*", "*://www.linkedin.com/*"],
   "background": {
     "service_worker": "background.bundle.js",
     "type": "module"
@@ -50,8 +46,5 @@
     "32": "crm-32.png",
     "48": "crm-48.png",
     "128": "crm-128.png"
-  },
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
   }
 }

@@ -25,7 +25,7 @@ async function handleWithdrawButtonClick() {
     );
 
     if (!buttons || buttons.length === 0) {
-      console.log("No more withdrawal buttons found, stopping.");
+      console.log("REABILITY: No more withdrawal buttons found, stopping.");
       break;
     }
 

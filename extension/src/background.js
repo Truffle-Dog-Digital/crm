@@ -1,6 +1,4 @@
-import { initializeFirebaseApp } from "./background-init.js";
-
-const { app, auth } = initializeFirebaseApp();
+// import { initializeFirebaseApp } from "./background-init.js";
 
 let isProduction = false;
 
