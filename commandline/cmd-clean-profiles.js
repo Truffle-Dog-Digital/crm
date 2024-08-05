@@ -1,8 +1,15 @@
 const fs = require("fs");
 const readline = require("readline");
 
+function extractProfileId(url) {
+  const urlParts = url.split("/");
+  const profileId =
+    urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2];
+  return profileId;
+}
+
 async function readProfilesFromFile(filePath) {
-  const profiles = new Set();
+  const profileIds = new Set();
   const fileStream = fs.createReadStream(filePath);
   const rl = readline.createInterface({
     input: fileStream,
@@ -12,14 +19,18 @@ async function readProfilesFromFile(filePath) {
   for await (const line of rl) {
     const trimmedLine = line.trim();
     if (trimmedLine) {
-      profiles.add(trimmedLine);
+      const standardizedLine = trimmedLine.replace(
+        "https://linkedin",
+        "https://www.linkedin"
+      );
+      profileIds.add(extractProfileId(standardizedLine));
     }
   }
-  return profiles;
+  return profileIds;
 }
 
 async function readJsonlFile(filePath) {
-  const profiles = new Set();
+  const profileIds = new Set();
   const fileStream = fs.createReadStream(filePath);
   const rl = readline.createInterface({
     input: fileStream,
@@ -30,21 +41,25 @@ async function readJsonlFile(filePath) {
     const trimmedLine = line.trim();
     if (trimmedLine) {
       const json = JSON.parse(trimmedLine);
-      profiles.add(json.profile);
+      profileIds.add(json.profileId);
     }
   }
-  return profiles;
+  return profileIds;
 }
 
 async function removeExistingProfiles() {
-  const inputProfiles = await readProfilesFromFile("profilesIn.txt");
-  const masterProfiles = await readJsonlFile("humansMaster.jsonl");
+  const inputProfileIds = await readProfilesFromFile("profilesIn.txt");
+  const masterProfileIds = await readJsonlFile("humansMasterWithIds.jsonl");
 
-  const outputProfiles = [...inputProfiles].filter(
-    (profile) => !masterProfiles.has(profile)
+  const outputProfileIds = [...inputProfileIds].filter(
+    (profileId) => !masterProfileIds.has(profileId)
   );
 
-  fs.writeFileSync("profilesOutSuccess.txt", outputProfiles.join("\n"), "utf8");
+  fs.writeFileSync(
+    "profilesOutSuccess.txt",
+    outputProfileIds.join("\n"),
+    "utf8"
+  );
 }
 
 removeExistingProfiles();
