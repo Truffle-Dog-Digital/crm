@@ -1,5 +1,9 @@
 import { injectHTMLAndCSS } from "./helpers-dom.js";
-import { copyToClipboard, clearClipboard } from "./helpers-clipboard.js";
+import {
+  copyToClipboard,
+  clearClipboard,
+  setupClipboardListener,
+} from "./helpers-clipboard.js";
 import {
   injectDrawer,
   setupProductionSwitch,
@@ -10,10 +14,6 @@ import {
 var isProduction = false;
 
 console.log("REABILITY: Lusha Contacts: 01");
-
-function setupClipboardListener() {
-  document.addEventListener("copy", handleClipboardCopy);
-}
 
 // Function to handle clipboard copy event
 async function handleClipboardCopy(event) {
@@ -59,7 +59,7 @@ setupDrawerCloseButton();
 
 injectHTMLAndCSS("lusha-contacts.html", null, "#reabilityDrawerContent")
   .then(() => {
-    setupClipboardListener();
+    setupClipboardListener(handleClipboardCopy);
   })
   .catch((error) => {
     console.error("REABILITY: Error setting up Lusha HTML and CSS:", error);

@@ -9,17 +9,14 @@ const linkedinConnect = require("./linkedinConnect");
 const testMode = true;
 const headless = false;
 const inputFileCookies = "linkedinCookies.json";
-const profilesInRequested = "profilesInRequested.txt";
-const profilesOutRequested = "profilesOutRequested.txt";
-const profilesOutNotRequested = "profilesOutNotRequested.txt";
+const profilesIn = "profilesIn.txt";
+const profilesOutSuccess = "profilesOutSuccess.txt";
+const profilesOutFail = "profilesOutFail.txt";
 const linkedinCustomConnectionText = "linkedinCustomConnectionText.txt";
 
 // Set up output files/streams
-const profilesOutRequestedStream =
-  syncFs.createWriteStream(profilesOutRequested);
-const profilesOutNotRequestedStream = syncFs.createWriteStream(
-  profilesOutNotRequested
-);
+const profilesOutSuccessStream = syncFs.createWriteStream(profilesOutSuccess);
+const profilesOutFailStream = syncFs.createWriteStream(profilesOutFail);
 
 // Main function
 (async () => {
@@ -27,7 +24,7 @@ const profilesOutNotRequestedStream = syncFs.createWriteStream(
   const cleanedCookies = await linkedinCleanCookies(inputFileCookies);
 
   // Read LinkedIn profile URLs from profiles.txt
-  const profiles = (await fs.readFile(profilesInRequested, "utf8"))
+  const profiles = (await fs.readFile(profilesIn, "utf8"))
     .split("\n")
     .filter((line) => line.trim() !== "");
 
@@ -55,24 +52,22 @@ const profilesOutNotRequestedStream = syncFs.createWriteStream(
         );
 
         if (connected) {
-          profilesOutRequestedStream.write(
-            `${JSON.stringify(profileDetails)}\n`
-          );
+          profilesOutSuccessStream.write(`${JSON.stringify(profileDetails)}\n`);
         } else {
-          profilesOutNotRequestedStream.write(`${profile}\n`);
+          profilesOutFailStream.write(`${profile}\n`);
         }
       } else {
-        profilesOutNotRequestedStream.write(`${profile}\n`);
+        profilesOutFailStream.write(`${profile}\n`);
       }
     } catch (error) {
       console.log(
         `Catch-all around grabbing profile details and connecting: ${error.message}`
       );
-      profilesOutNotRequestedStream.write(`${profile}\n`);
+      profilesOutFailStream.write(`${profile}\n`);
     }
   }
 
   await browser.close();
-  profilesOutRequestedStream.end();
-  profilesOutNotRequestedStream.end();
+  profilesOutSuccessStream.end();
+  profilesOutFailStream.end();
 })();

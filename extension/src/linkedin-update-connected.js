@@ -1,5 +1,9 @@
 import { injectHTMLAndCSS, waitForXPath } from "./helpers-dom.js";
-import { copyToClipboard, clearClipboard } from "./helpers-clipboard.js";
+import {
+  copyToClipboard,
+  clearClipboard,
+  setupClipboardListener,
+} from "./helpers-clipboard.js";
 import {
   injectDrawer,
   setupProductionSwitch,
@@ -10,10 +14,6 @@ import {
 var isProduction = false;
 
 console.log("REABILITY: Linkedin Update Connected: 03");
-
-function setupClipboardListener() {
-  document.addEventListener("copy", handleClipboardCopy);
-}
 
 // Function to handle clipboard copy event
 async function handleClipboardCopy(event) {
@@ -41,17 +41,14 @@ async function getLinkedinConnections() {
       3000
     );
 
-    // Create a Set to store unique hrefs
     const uniqueHrefs = new Set();
 
-    // Iterate over the nodes and extract hrefs
     for (const node of nodes) {
       if (node.href) {
         uniqueHrefs.add(node.href);
       }
     }
 
-    // Convert the Set to an array of plain URLs
     const urlsArray = Array.from(uniqueHrefs).map(
       (href) => `https://linkedin.com${new URL(href).pathname}`
     );
@@ -67,14 +64,13 @@ injectDrawer();
 setupProductionSwitch();
 setupDrawerCloseButton();
 
-// Initialize and inject the HTML and CSS, and setup clipboard listener
 injectHTMLAndCSS(
   "linkedin-update-connected.html",
   null,
   "#reabilityDrawerContent"
 )
   .then(() => {
-    setupClipboardListener();
+    setupClipboardListener(handleClipboardCopy);
   })
   .catch((error) => {
     console.error("REABILITY: Error setting up Linkedin HTML and CSS:", error);

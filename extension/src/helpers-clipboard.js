@@ -17,3 +17,8 @@ export async function clearClipboard() {
     console.error("REABILITY: Error clearing the clipboard", error);
   }
 }
+
+// Function to set up the clipboard listener
+export function setupClipboardListener(handleClipboardCopy) {
+  document.addEventListener("copy", handleClipboardCopy);
+}

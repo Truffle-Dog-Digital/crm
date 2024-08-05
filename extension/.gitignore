@@ -36,6 +36,9 @@ bower_components
 # firebase config isn't sensitive, but messy to have mine in there
 firebaseConfig.js
 
+# various input/output data files
+*.jsonl
+
 # Editor directories and files
 .idea
 *.suo
