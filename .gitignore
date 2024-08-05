@@ -36,5 +36,5 @@ linkedinCookies.json
 secrets.json
 
 # various input/output data files
-humansMaster.*
+*.jsonl
 
