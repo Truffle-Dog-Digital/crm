@@ -1,4 +1,4 @@
-async function linkedinGrabProfileDetails(page, profile, customText) {
+async function linkedinGrabProfileDetails(page, profileId, customText) {
   try {
     // Just in case the page loads slowly, wait for the experience section
     await page.waitForSelector('xpath///section[.//div[@id="experience"]]');
@@ -67,9 +67,9 @@ async function linkedinGrabProfileDetails(page, profile, customText) {
 
     const requestSent = new Date().toLocaleDateString("en-CA", options); // 'en-CA' gives the format YYYY-MM-DD
 
-    return { name, requestSent, profile, customText, roles };
+    return { name, requestSent, customText, roles };
   } catch (error) {
-    console.log(`Error with: ${profile} -- ${error.message}`);
+    console.log(`Error with: ${profileId} -- ${error.message}`);
     return false;
   }
 }
