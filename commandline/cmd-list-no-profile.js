@@ -1,5 +1,6 @@
 // ---------------------------------------------------------------
 // List entries in humansMaster.jsonl that do not have a profileId
+// -> output to console
 // ---------------------------------------------------------------
 
 const fs = require("fs");
@@ -7,7 +8,6 @@ const readline = require("readline");
 
 async function readNamesWithoutProfileId() {
   const inputFile = "humansMaster.jsonl";
-  const outputFile = "profilesOutSuccess.txt";
   const fileStream = fs.createReadStream(inputFile);
   const rl = readline.createInterface({
     input: fileStream,
@@ -26,7 +26,7 @@ async function readNamesWithoutProfileId() {
     }
   }
 
-  fs.writeFileSync(outputFile, names.join("\n"), "utf8");
+  console.log(names.join("\n"), "utf8");
 }
 
 readNamesWithoutProfileId();
