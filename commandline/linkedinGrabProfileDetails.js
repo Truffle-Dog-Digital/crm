@@ -9,6 +9,18 @@ async function linkedinGrabProfileDetails(page, profileId, customText) {
       return element ? element.textContent.trim() : null;
     });
 
+    // Grab the LinkedIn distance
+    const linkedinDistance = await page.evaluate(() => {
+      const element = document.evaluate(
+        "//div[contains(@class, 'ph5')]//span[contains(@class, 'distance-badge')]//span[contains(@class, 'dist-value')]",
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
+      return element ? element.textContent.trim() : null;
+    });
+
     let roles = [];
 
     // Find "Current" position spans
@@ -67,7 +79,7 @@ async function linkedinGrabProfileDetails(page, profileId, customText) {
 
     const requestSent = new Date().toLocaleDateString("en-CA", options); // 'en-CA' gives the format YYYY-MM-DD
 
-    return { name, requestSent, customText, roles };
+    return { name, requestSent, customText, roles, linkedinDistance };
   } catch (error) {
     console.log(`Error with: ${profileId} -- ${error.message}`);
     return false;
