@@ -24,24 +24,28 @@ const maxSuccessfulProfiles = 20;
   // Clean cookies
   const cleanedCookies = await linkedinCleanCookies(inputFileCookies);
 
-  // Read LinkedIn profile URLs from profilesIn.txt
+  // Read input profiles from file (line delimited text)
   const profilesInArray = await getArrayFromTextFile(profilesIn);
 
-  // Read custom connection text from linkedinCustomConnectionText.txt
+  // Read custom connection text from file (line delimited text)
   const customText = await fs.readFile(linkedinCustomConnectionText, "utf8");
 
-  // Read humansMaster.jsonl and extract profile IDs
+  // Read the master "database" of humans (JSONL)
   const humansData = await getMapFromJsonl(humansMaster);
   if (!humansData) {
     console.error("Failed to load humans from JSONL.");
     return;
   }
+
+  // Create a set of existing profile IDs to dedupe connection requests
   const existingProfileIds = new Set(
     Array.from(humansData.values()).map((human) => human.profileId)
   );
 
+  // Setup Puppeteer with cleaned Linkedin cookies
   const { browser, page } = await createPage(cleanedCookies, headless);
 
+  // Set up a bunch of counters for reporting at the end
   let totalLines = 0;
   let successfulLines = 0;
   let preexistingLine = 0;
@@ -50,6 +54,7 @@ const maxSuccessfulProfiles = 20;
   const profilesOutFailData = [];
   const humansOutSuccessData = [];
 
+  // Loop through each profile in the input file
   for (const profileInString of profilesInArray) {
     if (successfulLines >= maxSuccessfulProfiles) {
       break;
@@ -57,22 +62,27 @@ const maxSuccessfulProfiles = 20;
 
     totalLines++;
 
+    // Get the profile ID from the input string
     const profileId = getProfileId(profileInString);
+
+    // Skip if the profile ID is not valid or already exists in the master "database"
     if (!profileId || existingProfileIds.has(profileId)) {
       profilesOutFailData.push(profileInString);
       preexistingLine++;
       continue;
     }
 
-    // Add profileId to existingProfileIds to avoid duplicates
+    // Add the profile ID to the set of existing profile IDs to dedupe inputs
     existingProfileIds.add(profileId);
 
+    // Recreate a clean URL from the profile ID
     const profileUrl = `https://linkedin.com/in/${profileId}/`;
 
+    // Grab details from the profile page and send a connection request
     try {
       await page.goto(profileUrl, { waitUntil: "domcontentloaded" });
 
-      // Grab profile details without including the `profile` key
+      // Grab the profile details from current page
       const profileDetails = await linkedinGrabProfileDetails(page);
 
       if (profileDetails) {
@@ -80,24 +90,28 @@ const maxSuccessfulProfiles = 20;
         profileDetails.customText = customText;
         profileDetails.requestSent = getTodayISODate();
 
-        const connected = await linkedinConnect(
+        // Send a connection request
+        const connectionRequested = await linkedinConnect(
           testMode,
           profileUrl,
           page,
           customText
         );
 
-        if (connected) {
-          // Use the new helper function to reorder profile details
+        if (connectionRequested) {
+          // Make the object easier to read in JSONL output
           const reorderedProfileDetails = reorderProfileDetails(profileDetails);
 
+          // Add the profile details to the output file as JSONL for master
           humansOutSuccessData.push(reorderedProfileDetails);
+
           successfulLines++;
           lastSuccessfulProfileId = profileId;
         } else {
           profilesOutFailData.push(profileInString);
         }
       } else {
+        // Failed to grab profile details
         failedProfileLines++;
         console.log(`Failed profile grab:  ${profileUrl}`);
         profilesOutFailData.push(profileInString);
@@ -120,7 +134,7 @@ const maxSuccessfulProfiles = 20;
   );
   await fs.writeFile(profilesOutFail, profilesOutFailData.join("\n"), "utf8");
 
-  console.log("Summary:");
+  // Log the summary
   console.log(`Processed:       ${totalLines}`);
   console.log(`Already in DB:   ${preexistingLine}`);
   console.log(`Failed grab:     ${failedProfileLines}`);
