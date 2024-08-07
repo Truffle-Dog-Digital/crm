@@ -1,4 +1,4 @@
-async function linkedinGrabProfileDetails(page, profileId, customText) {
+async function linkedinGrabProfileDetails(page) {
   try {
     // Just in case the page loads slowly, wait for the experience section
     await page.waitForSelector('xpath///section[.//div[@id="experience"]]');
@@ -70,18 +70,13 @@ async function linkedinGrabProfileDetails(page, profileId, customText) {
 
       roles.push({ company, position });
     }
-    const options = {
-      timeZone: "Australia/Sydney",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
+
+    return {
+      name,
+      linkedinDistance,
+      roles,
     };
-
-    const requestSent = new Date().toLocaleDateString("en-CA", options); // 'en-CA' gives the format YYYY-MM-DD
-
-    return { name, requestSent, customText, roles, linkedinDistance };
   } catch (error) {
-    console.log(`Error with: ${profileId} -- ${error.message}`);
     return false;
   }
 }

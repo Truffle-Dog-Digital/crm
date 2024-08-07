@@ -1,5 +1,6 @@
+// Return a profileId regardless of whether the input is
+// a linkedin URL with an embedded profileId or a direct profileId
 function getProfileId(input) {
-  // Regular expression to match the profile ID in LinkedIn URLs or direct profile ID strings
   const regex = /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/([^/]+)\/?$/;
   const directRegex = /^[a-zA-Z0-9-]+$/;
 
@@ -17,18 +18,45 @@ function getProfileId(input) {
   }
 }
 
-// For my OCD, will render attributes in order of visual importance
-function reorderProfileDetails(profileDetails, profileId) {
-  const { name, requestSent, customText, roles, profile, ...rest } =
-    profileDetails;
-  return {
+// Reformat a human's keys to be more readable in jsonl file format
+function reorderProfileDetails(profileDetails) {
+  const {
     name,
     profileId,
+    linkedinDistance,
     roles,
     requestSent,
     customText,
+    notes,
+    channel,
+    bestChannelConnected,
+    ...rest
+  } = profileDetails;
+
+  const reorderedProfile = {
+    name,
+    profileId,
+    linkedinDistance,
+    roles,
+    requestSent,
+    customText,
+    notes,
+    channel,
+    bestChannelConnected,
     ...rest,
   };
+
+  // Remove keys with undefined values
+  Object.keys(reorderedProfile).forEach((key) => {
+    if (reorderedProfile[key] === undefined) {
+      delete reorderedProfile[key];
+    }
+  });
+
+  return reorderedProfile;
 }
 
-module.exports = { getProfileId, reorderProfileDetails };
+module.exports = {
+  getProfileId,
+  reorderProfileDetails,
+};
