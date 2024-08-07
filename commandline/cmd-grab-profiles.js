@@ -70,11 +70,23 @@ const maxProfiles = 3;
 
       if (profileDetails) {
         profileDetails.profileId = profileId;
-        profileDetails.requestSent = getTodayISODate();
+        profileDetails.lastGrabbed = getTodayISODate();
+        profileDetails.audit = `${getTodayISODate()}: Grabbed profile`;
+
+        // Make the object easier to read in JSONL output
+        const reorderedProfileDetails = reorderProfileDetails(profileDetails);
+
+        // Add the profile details to the output file as JSONL for master
+        humansOutSuccessData.push(reorderedProfileDetails);
+
+        successfulLines++;
+        lastSuccessfulProfileId = profileId;
+
+        console.log(`Success: ${profileUrl}`);
       } else {
         // Failed to grab profile details
         failedProfileLines++;
-        console.log(`Failed profile grab:  ${profileUrl}`);
+        console.log(`Fail:    ${profileUrl}`);
         profilesOutFailData.push(profileInString);
       }
     } catch (error) {
