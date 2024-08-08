@@ -9,7 +9,7 @@ const { getArrayFromTextFile, getMapFromJsonl } = require("./helpers-files");
 const { getTodayISODate } = require("./helpers-general");
 
 // Configuration
-const testMode = true;
+const testMode = false;
 const headless = false;
 const inputFileCookies = "linkedinCookies.json";
 const profilesIn = "profilesIn.txt";
