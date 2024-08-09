@@ -1,8 +1,10 @@
-const { getArrayFromTextFile, getMapFromJsonl } = require("./helpers-files");
+const fs = require("fs").promises;
+const { getArrayFromTextFile, getArrayFromJsonl } = require("./helpers-files");
 const { getProfileId } = require("./helpers-profiles");
 
 const profilesInFile = "profilesIn.txt";
 const humansMasterFile = "humansMaster.jsonl";
+const profilesOutSuccessFile = "profilesOutSuccess.txt";
 
 async function analyzeProfiles() {
   // Read profilesIn.txt into an array
@@ -12,14 +14,20 @@ async function analyzeProfiles() {
     return;
   }
 
-  // Read humansMaster.jsonl into a map
-  const humansMap = await getMapFromJsonl(humansMasterFile);
-  if (!humansMap) {
+  // Read humansMaster.jsonl into an array
+  const humansArray = await getArrayFromJsonl(humansMasterFile);
+  if (!humansArray) {
     console.error("Failed to load humans from humansMaster.jsonl.");
     return;
   }
 
+  // Create a set of existing profile IDs from humansArray
+  const existingProfileIds = new Set(
+    humansArray.map((human) => human.profileId)
+  );
+
   const uniqueProfiles = new Set();
+  const cleanedProfileIds = [];
   let duplicateCounter = 0;
   let alreadyInDbCounter = 0;
 
@@ -31,12 +39,13 @@ async function analyzeProfiles() {
     }
 
     if (uniqueProfiles.has(profileId)) {
-      console.log(`Duplicate profile ignored: ${profile}`);
       duplicateCounter++;
     } else {
       uniqueProfiles.add(profileId);
-      if (humansMap.has(profileId)) {
+      if (existingProfileIds.has(profileId)) {
         alreadyInDbCounter++;
+      } else {
+        cleanedProfileIds.push(profileId);
       }
     }
   }
@@ -44,6 +53,13 @@ async function analyzeProfiles() {
   console.log("Summary:");
   console.log(`Total duplicate profiles ignored: ${duplicateCounter}`);
   console.log(`Total profiles already in the database: ${alreadyInDbCounter}`);
+
+  // Write cleaned profile IDs to profilesOutSuccess.txt
+  await fs.writeFile(
+    profilesOutSuccessFile,
+    cleanedProfileIds.join("\n"),
+    "utf8"
+  );
 }
 
 analyzeProfiles();
