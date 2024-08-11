@@ -18,45 +18,44 @@ function getProfileId(input) {
   }
 }
 
-// Reformat a human's keys to be more readable in jsonl file format
 function reorderProfileDetails(profileDetails) {
   const {
     name,
     profileId,
+    oldProfileId,
     linkedinDistance,
     roles,
     requestSent,
+    pendingConnectionRequest,
     customText,
     notes,
     channel,
     bestChannelConnected,
     lastGrabbed,
     audit,
-    oldProfileId,
-    pendingConnectionRequest,
     ...rest
   } = profileDetails;
 
   const reorderedProfile = {
     name,
     profileId,
+    oldProfileId,
     linkedinDistance,
     roles,
     requestSent,
+    pendingConnectionRequest,
     customText,
     notes,
     channel,
     bestChannelConnected,
     lastGrabbed,
     audit,
-    oldProfileId,
-    pendingConnectionRequest,
     ...rest,
   };
 
-  // Remove keys with undefined values
+  // Remove keys with undefined or null values
   Object.keys(reorderedProfile).forEach((key) => {
-    if (reorderedProfile[key] === undefined) {
+    if (reorderedProfile[key] === undefined || reorderedProfile[key] === null) {
       delete reorderedProfile[key];
     }
   });
