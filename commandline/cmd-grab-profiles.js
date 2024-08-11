@@ -66,12 +66,10 @@ const maxProfiles = 3;
       await page.goto(profileUrl, { waitUntil: "domcontentloaded" });
 
       // Grab the profile details from current page
-      const profileDetails = await linkedinGrabProfileDetails(page);
+      const profileDetails = await linkedinGrabProfileDetails(profileId, page);
 
       if (profileDetails) {
-        profileDetails.profileId = profileId;
-        profileDetails.lastGrabbed = getTodayISODate();
-        profileDetails.audit = `${getTodayISODate()}: Grabbed profile`;
+        profileDetails.audit = [`${getTodayISODate()}: Grabbed profile`];
 
         // Make the object easier to read in JSONL output
         const reorderedProfileDetails = reorderProfileDetails(profileDetails);

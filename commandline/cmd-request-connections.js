@@ -9,7 +9,7 @@ const { getArrayFromTextFile, getMapFromJsonl } = require("./helpers-files");
 const { getTodayISODate } = require("./helpers-general");
 
 // Configuration
-const testMode = false;
+const testMode = true;
 const headless = false;
 const inputFileCookies = "linkedinCookies.json";
 const profilesIn = "profilesIn.txt";
@@ -65,15 +65,12 @@ const maxSuccessfulProfiles = 20;
     // Get the profile ID from the input string
     const profileId = getProfileId(profileInString);
 
-    // Skip if the profile ID is not valid or already exists in the master "database"
-    if (!profileId || existingProfileIds.has(profileId)) {
+    // If the profile ID is not valid skip it
+    if (!profileId) {
+      console.log(`Couldn't get id from:  ${profileUrl}`);
       profilesOutFailData.push(profileInString);
-      preexistingLine++;
       continue;
     }
-
-    // Add the profile ID to the set of existing profile IDs to dedupe inputs
-    existingProfileIds.add(profileId);
 
     // Recreate a clean URL from the profile ID
     const profileUrl = `https://linkedin.com/in/${profileId}/`;
@@ -83,14 +80,39 @@ const maxSuccessfulProfiles = 20;
       await page.goto(profileUrl, { waitUntil: "domcontentloaded" });
 
       // Grab the profile details from current page
-      const profileDetails = await linkedinGrabProfileDetails(page);
+      const profileDetails = await linkedinGrabProfileDetails(profileId, page);
 
+      // Found a profile, grabbed some details
       if (profileDetails) {
-        profileDetails.profileId = profileId;
-        profileDetails.customText = customText;
-        profileDetails.requestSent = getTodayISODate();
+        // Check if this is an old profile detail.
+        // If it is, check if either ID is in the DB already.
+        // If either is, carry on but log it so that we can manually merge
+        if (profileDetails.oldProfileId) {
+          console.log(
+            `Found renamed profile: ${profileDetails.oldProfileId} ->  ${profileDetails.profileId}`
+          );
+          if (
+            existingProfileIds.has(profileDetails.oldProfileId) ||
+            existingProfileIds.has(profileDetails.profileId)
+          ) {
+            console.log(
+              `Found existing profile: ${profileDetails.oldProfileId} ->  ${profileDetails.profileId}`
+            );
+          }
+        }
+        // Already connected, but we didn't find them in the DB.
+        // Add the profile details to the output file as JSONL for master
+        // because we might have additional details post-connection.
+        //    But don't increase the successfulLines counter because we
+        //    won't try to connect
+        if ((linkedinDistance = "1st")) {
+          humansOutSuccessData.push(reorderedProfileDetails);
+          console.log(`Already connected:      ${profileUrl}`);
+          continue;
+        }
 
-        // Send a connection request
+        // Not connected, try to send a connection request
+        // (could still be already pending at this point)
         const connectionRequested = await linkedinConnect(
           testMode,
           profileUrl,
@@ -99,6 +121,9 @@ const maxSuccessfulProfiles = 20;
         );
 
         if (connectionRequested) {
+          // Record the date we successfully requested a connection
+          profileDetails.requestSent = getTodayISODate();
+
           // Make the object easier to read in JSONL output
           const reorderedProfileDetails = reorderProfileDetails(profileDetails);
 
@@ -108,12 +133,15 @@ const maxSuccessfulProfiles = 20;
           successfulLines++;
           lastSuccessfulProfileId = profileId;
         } else {
+          // Profile grabbed, but the connection request failed.
+          // They're not a 1st, so this is worth investigating.
+          // Also, worth recording the updated profile details
           profilesOutFailData.push(profileInString);
         }
       } else {
         // Failed to grab profile details
         failedProfileLines++;
-        console.log(`Failed profile grab:  ${profileUrl}`);
+        console.log(`Failed profile grab:   ${profileUrl}`);
         profilesOutFailData.push(profileInString);
       }
     } catch (error) {

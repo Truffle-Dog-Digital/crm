@@ -1,7 +1,22 @@
-async function linkedinGrabProfileDetails(page) {
+const { getTodayISODate } = require("./helpers-general");
+const {
+  puppeteerGetNewProfileId,
+  puppeteerGetRoles,
+} = require("./helpers-puppeteer");
+
+async function linkedinGrabProfileDetails(profileId, page) {
   try {
     // Just in case the page loads slowly, wait for the experience section
     await page.waitForSelector('xpath///section[.//div[@id="experience"]]');
+
+    // See if this profile is an old one with redirects to new one.
+    // If so, rearrange profileId and oldProfileId
+    const newProfileId = await puppeteerGetNewProfileId(profileId, page);
+    let oldProfileId = null;
+    if (newProfileId) {
+      oldProfileId = profileId;
+      profileId = newProfileId;
+    }
 
     // Grab the person's name
     const name = await page.evaluate(() => {
@@ -21,62 +36,38 @@ async function linkedinGrabProfileDetails(page) {
       return element ? element.textContent.trim() : null;
     });
 
-    let roles = [];
+    // Check for a "Pending" connection request
+    const pendingConnectionRequest = await page
+      .waitForSelector(
+        'xpath///div[contains(@class, "ph5")]//button//span[text()="Pending"]',
+        { timeout: 3000 }
+      )
+      .then(() => true)
+      .catch(() => false);
 
-    // Find "Current" position spans
-    const currentRoles = await page.$$(
-      'xpath///section[.//div[@id="experience"]]//span[contains(text(), " - Present")]/ancestor::*[2]'
-    );
+    // Grab current roles, if any
+    const roles = await puppeteerGetRoles(page);
 
-    for (const role of currentRoles) {
-      const tagName = await role.evaluate((node) => node.tagName.toLowerCase());
-      let position = null;
-      let company = null;
+    // Record what date we grabbed this profile
+    const lastGrabbed = getTodayISODate();
 
-      if (tagName === "div") {
-        const spans = await role.$$('span[aria-hidden="true"]');
-        if (spans.length >= 2) {
-          position = await spans[0].evaluate((node) => node.textContent.trim());
-          company = await spans[1].evaluate((node) => node.textContent.trim());
-        }
-      } else {
-        // Grab the position
-        const positionSpan = await role.$('span[aria-hidden="true"]');
-        position = positionSpan
-          ? await positionSpan.evaluate((node) => node.textContent.trim())
-          : null;
-
-        // Navigate up 6 levels manually and then to the previous sibling
-        const ancestorLevel = await role.evaluateHandle((node) => {
-          let current = node;
-          for (let i = 0; i < 6; i++) {
-            current = current.parentElement;
-          }
-          let sibling = current.previousElementSibling;
-          return sibling;
-        });
-
-        if (ancestorLevel) {
-          const companySpan = await ancestorLevel.$('span[aria-hidden="true"]');
-          company = companySpan
-            ? await companySpan.evaluate((node) => node.textContent.trim())
-            : null;
-        }
-      }
-
-      if (position) {
-        position = position.split(" · ")[0];
-      }
-
-      roles.push({ company, position });
-    }
-
-    return {
+    const newProfile = {
+      profileId,
       name,
       linkedinDistance,
       roles,
+      lastGrabbed,
+      oldProfileId,
+      pendingConnectionRequest,
     };
+
+    if (oldProfileId) {
+      newProfile.oldProfileId = oldProfileId;
+    }
+
+    return newProfile;
   } catch (error) {
+    console.error(`Error grabbing profile details for ${profileId}: ${error}`);
     return false;
   }
 }

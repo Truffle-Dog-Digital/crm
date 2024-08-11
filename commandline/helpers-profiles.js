@@ -30,6 +30,10 @@ function reorderProfileDetails(profileDetails) {
     notes,
     channel,
     bestChannelConnected,
+    lastGrabbed,
+    audit,
+    oldProfileId,
+    pendingConnectionRequest,
     ...rest
   } = profileDetails;
 
@@ -43,6 +47,10 @@ function reorderProfileDetails(profileDetails) {
     notes,
     channel,
     bestChannelConnected,
+    lastGrabbed,
+    audit,
+    oldProfileId,
+    pendingConnectionRequest,
     ...rest,
   };
 
