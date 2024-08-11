@@ -1,4 +1,7 @@
-const { getTodayISODate } = require("./helpers-general");
+const { getTodayISODate, timeStamp } = require("./helpers-general");
+const {
+  puppeteerGetContactDetails,
+} = require("./helpers-puppeteer-get-contact-details");
 const {
   puppeteerGetNewProfileId,
   puppeteerGetRoles,
@@ -6,19 +9,14 @@ const {
 
 async function linkedinGrabProfileDetails(profileId, page) {
   try {
-    const newProfile = {};
+    var newProfile = { profileId };
 
     // Just in case the page loads slowly, wait for the experience section
     await page.waitForSelector('xpath///section[.//div[@id="experience"]]');
 
     // See if this profile is an old one with redirects to new one.
-    // If so, rearrange profileId and oldProfileId
-    newProfile.profileId = await puppeteerGetNewProfileId(profileId, page);
-    if (newProfile.profileId) {
-      newProfile.oldProfileId = profileId;
-    } else {
-      newProfile.profileId = profileId;
-    }
+    // Set profileId and oldProfileId appropriately
+    await puppeteerGetNewProfileId(newProfile, page);
 
     // Grab the person's name
     newProfile.name = await page.evaluate(() => {
@@ -39,18 +37,25 @@ async function linkedinGrabProfileDetails(profileId, page) {
     });
 
     // Check for a "Pending" connection request
+    console.log(`${timeStamp()} checking pending request`);
     newProfile.pendingConnectionRequest = await page
       .waitForSelector(
         'xpath///div[contains(@class, "ph5")]//button//span[text()="Pending"]',
-        { timeout: 3000 }
+        { timeout: 10 }
       )
       .then(() => true)
       .catch(() => false);
 
     // Grab current roles, if any
-    newProfile.roles = await puppeteerGetRoles(page);
+    console.log(`${timeStamp()} calling puppeteerGetRoles`);
+    await puppeteerGetRoles(newProfile, page);
+
+    // Grab contact details, if any
+    console.log(`${timeStamp()} calling puppeteerGetContactDetails`);
+    await puppeteerGetContactDetails(newProfile, page);
 
     // Record what date we grabbed this profile
+    console.log(`${timeStamp()} setting the date`);
     newProfile.lastGrabbed = getTodayISODate();
 
     return newProfile;

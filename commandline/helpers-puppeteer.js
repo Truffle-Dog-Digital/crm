@@ -1,10 +1,10 @@
-const { waitForSelector } = require("puppeteer");
-
-async function puppeteerGetNewProfileId(profileId, page) {
+// Check the page for references to a new profileId
+// If found, update the profileId and oldProfileId accordingly
+async function puppeteerGetNewProfileId(profile, page) {
   const possibleRedirectSelectors = [
-    `a[href*="/details/"]:not([href*="${profileId}/"])`,
-    `a[href*="/overlay/"]:not([href*="${profileId}/"])`,
-    `a[href*="/recent-activity/"]:not([href*="${profileId}/"])`,
+    `a[href*="/details/"]:not([href*="${profile.profileId}/"])`,
+    `a[href*="/overlay/"]:not([href*="${profile.profileId}/"])`,
+    `a[href*="/recent-activity/"]:not([href*="${profile.profileId}/"])`,
   ];
 
   let newProfileId = null;
@@ -17,21 +17,26 @@ async function puppeteerGetNewProfileId(profileId, page) {
         redirectElement
       );
       const match = href.match(/\/in\/([^/]+)\//);
-      if (match && match[1] !== profileId) {
+      if (match && match[1] !== profile.profileId) {
         newProfileId = match[1];
         console.log(
-          `==== ALERT: check master file for duplicates  (old:${profileId} new:${newProfileId}) ====`
+          `==== ALERT: check master file for duplicates  (old:${profile.profileId} new:${newProfileId}) ====`
         );
         break;
       }
     }
   }
 
-  return newProfileId;
+  // If there's a newer profile, switch ID's accordingly
+  if (newProfileId) {
+    profile.oldProfileId = profile.profileId;
+    profile.profileId = newProfileId;
+  }
 }
 
-async function puppeteerGetRoles(page) {
-  const roles = [];
+// Grab the person's roles from the "Experience" section
+async function puppeteerGetRoles(profile, page) {
+  profile.roles = [];
 
   const currentRoles = await page.$$(
     'xpath///section[.//div[@id="experience"]]//span[contains(text(), " - Present")]/ancestor::*[2]'
@@ -75,10 +80,8 @@ async function puppeteerGetRoles(page) {
       position = position.split(" · ")[0];
     }
 
-    roles.push({ company, position });
+    profile.roles.push({ company, position });
   }
-
-  return roles;
 }
 
 module.exports = {

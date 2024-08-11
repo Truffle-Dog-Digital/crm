@@ -13,6 +13,12 @@ function getTodayISODate() {
   return `${year}-${month}-${day}`;
 }
 
+function timeStamp() {
+  const now = new Date();
+  return `[${now.toTimeString().split(" ")[0]}]`; // Returns "[hh:mm:ss]"
+}
+
 module.exports = {
   getTodayISODate,
+  timeStamp,
 };
