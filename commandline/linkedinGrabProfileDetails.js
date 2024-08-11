@@ -6,26 +6,28 @@ const {
 
 async function linkedinGrabProfileDetails(profileId, page) {
   try {
+    const newProfile = {};
+
     // Just in case the page loads slowly, wait for the experience section
     await page.waitForSelector('xpath///section[.//div[@id="experience"]]');
 
     // See if this profile is an old one with redirects to new one.
     // If so, rearrange profileId and oldProfileId
-    const newProfileId = await puppeteerGetNewProfileId(profileId, page);
-    let oldProfileId = null;
-    if (newProfileId) {
-      oldProfileId = profileId;
-      profileId = newProfileId;
+    newProfile.profileId = await puppeteerGetNewProfileId(profileId, page);
+    if (newProfile.profileId) {
+      newProfile.oldProfileId = profileId;
+    } else {
+      newProfile.profileId = profileId;
     }
 
     // Grab the person's name
-    const name = await page.evaluate(() => {
+    newProfile.name = await page.evaluate(() => {
       const element = document.querySelector("div.ph5 h1.text-heading-xlarge");
       return element ? element.textContent.trim() : null;
     });
 
     // Grab the LinkedIn distance
-    const linkedinDistance = await page.evaluate(() => {
+    newProfile.linkedinDistance = await page.evaluate(() => {
       const element = document.evaluate(
         "//div[contains(@class, 'ph5')]//span[contains(@class, 'distance-badge')]//span[contains(@class, 'dist-value')]",
         document,
@@ -37,7 +39,7 @@ async function linkedinGrabProfileDetails(profileId, page) {
     });
 
     // Check for a "Pending" connection request
-    const pendingConnectionRequest = await page
+    newProfile.pendingConnectionRequest = await page
       .waitForSelector(
         'xpath///div[contains(@class, "ph5")]//button//span[text()="Pending"]',
         { timeout: 3000 }
@@ -46,24 +48,10 @@ async function linkedinGrabProfileDetails(profileId, page) {
       .catch(() => false);
 
     // Grab current roles, if any
-    const roles = await puppeteerGetRoles(page);
+    newProfile.roles = await puppeteerGetRoles(page);
 
     // Record what date we grabbed this profile
-    const lastGrabbed = getTodayISODate();
-
-    const newProfile = {
-      profileId,
-      name,
-      linkedinDistance,
-      roles,
-      lastGrabbed,
-      oldProfileId,
-      pendingConnectionRequest,
-    };
-
-    if (oldProfileId) {
-      newProfile.oldProfileId = oldProfileId;
-    }
+    newProfile.lastGrabbed = getTodayISODate();
 
     return newProfile;
   } catch (error) {
