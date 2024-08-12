@@ -3,6 +3,11 @@ const {
   waitForElementToDisappear,
 } = require("./helpers-puppeteer-xpath");
 const fs = require("fs");
+const getISODateFrom = require("./helpers-general").getISODateFrom;
+
+// We use this a few times
+const dismissButtonSelector =
+  '//div[@data-test-modal]//button[@aria-label="Dismiss"]';
 
 // Get contact details from the "Contact info" dialog/overlay
 async function puppeteerGetContactDetails(profile, page) {
@@ -12,21 +17,13 @@ async function puppeteerGetContactDetails(profile, page) {
       page,
       "//a[@id='top-card-text-details-contact-info']"
     );
-
     if (contactInfoElement) {
-      console.log("Contact link found, clicking it");
       await page.evaluate((el) => el.click(), contactInfoElement);
-      console.log("Contact link clicked");
 
       // Wait for the dismiss button to appear, keep it for closing the dialog later
-      const dismissButton = await waitForElement(
-        page,
-        '//div[@data-test-modal]//button[@aria-label="Dismiss"]'
-      );
+      var dismissButton = await waitForElement(page, dismissButtonSelector);
 
       if (dismissButton) {
-        console.log("Contact dialog open");
-
         // Wait for the contact info sections to appear
         const oneSection = await waitForElement(
           page,
@@ -34,8 +31,6 @@ async function puppeteerGetContactDetails(profile, page) {
         );
 
         if (oneSection) {
-          console.log("Section found");
-
           // Evaluate the page to extract contact info sections, ignoring the first one
           const contactInfo = await page.evaluate(() => {
             const sections = Array.from(
@@ -43,12 +38,9 @@ async function puppeteerGetContactDetails(profile, page) {
             );
             const contactDetails = {};
 
-            sections.slice(1).forEach((section, index) => {
-              // Skip the first section
-              const key = section
-                .querySelector("h3")
-                ?.innerText.trim()
-                .toLowerCase();
+            sections.forEach((section, index) => {
+              const key =
+                "linkedin" + section.querySelector("h3")?.innerText.trim();
               const sibling = section.querySelector("h3").nextElementSibling;
               let value = "";
 
@@ -57,86 +49,73 @@ async function puppeteerGetContactDetails(profile, page) {
               } else {
                 value = sibling?.innerText.trim();
               }
-
-              if (key === "connected") {
-                const [month, day, year] = value.split(" ");
-                const months = {
-                  Jan: "01",
-                  Feb: "02",
-                  Mar: "03",
-                  Apr: "04",
-                  May: "05",
-                  Jun: "06",
-                  Jul: "07",
-                  Aug: "08",
-                  Sep: "09",
-                  Oct: "10",
-                  Nov: "11",
-                  Dec: "12",
-                };
-                value = `${year}-${months[month]}-${day
-                  .replace(",", "")
-                  .padStart(2, "0")}`;
-              }
-
-              if (!key || !value) {
-                console.error(
-                  `Null detected at Section ${
-                    index + 2
-                  }: key: ${key}, value: ${value}`
-                );
-              } else {
-                console.log(
-                  `Section ${index + 2}: key: ${key}, value: ${value}`
-                );
-              }
               contactDetails[key] = value;
             });
 
             return contactDetails;
           });
 
-          // Add contact details to the profile object
-          profile.contactDetails = contactInfo;
-          console.log("Extracted contact details:", contactInfo);
+          // The first object in contactDetails is the user's CURRENT profile.
+          // if it's different from the profile we navigated to,
+          // store oldProfileId and profileId appropriately
+          const newProfileId = Object.values(contactInfo)[0].split("/").pop();
+          if (newProfileId !== profile.profileId) {
+            profile.oldProfileId = profile.profileId;
+            profile.profileId = newProfileId;
+            console.log(
+              `==== check master file for duplicates  (old:${profile.oldProfileId} new:${profile.profileId}) ====`
+            );
+          }
+
+          // Check we have at least one contact detail, otherwise it's an edge case we haven't handled
+          if ((Object.keys(contactInfo).length = 0)) {
+            throw new Error(
+              `Found a section, but post-processing there are none left: ${profile.profileId}`
+            );
+          }
+
+          // Add contact details to the profile object (skip profile, we've done that already)
+          Object.entries(contactInfo).forEach(([key, value], index) => {
+            if (index > 0) {
+              if (key == "linkedinConnected")
+                // Reformat the linkedin date to ISO format
+                profile[key] = getISODateFrom(value);
+              else profile[key] = value;
+            }
+          });
         } else {
-          console.log("No additional contact sections found.");
+          throw new Error(
+            `No contact sections found, expect at least one: ${profile.profileId}`
+          );
         }
 
-        // Capture a screenshot of the dialog
-        await page.screenshot({ path: "log.png" });
-        console.log("Screenshot captured and saved as log.png");
-
         // Click the dismiss button
-        const xButton = await waitForElement(
-          page,
-          '//div[@data-test-modal]//button[@aria-label="Dismiss"]'
-        );
-        console.log("Clicking dismiss button");
-        console.log(xButton);
-        await page.evaluate((el) => el.click(), xButton);
+        dismissButton = await waitForElement(page, dismissButtonSelector);
+        await page.evaluate((el) => el.click(), dismissButton);
 
         // Wait for the dismiss button to disappear
         const dismissed = await waitForElementToDisappear(
           page,
-          '//div[@data-test-modal]//button[@aria-label="Dismiss"]'
+          dismissButtonSelector
         );
-        console.log("XPath absent has returned");
 
-        if (dismissed) {
-          console.log("Dismissed contact dialog successfully");
-        } else {
-          console.log("Failed to dismiss contact dialog successfully");
-          throw new Error("Couldn't dismiss contacts dialog");
+        if (!dismissed) {
+          throw new Error(
+            `Couldn't dismiss contacts dialog: ${profile.profileId}`
+          );
         }
       } else {
-        throw new Error("Contacts dialog did not load as expected.");
+        throw new Error(
+          `Contacts dialog did not load as expected: ${profile.profileId}`
+        );
       }
     } else {
-      throw new Error("Contact info link not found.");
+      throw new Error(`Contact info link not found: ${profile.profileId}`);
     }
   } catch (error) {
-    console.error(`Error in puppeteerGetContactDetails: ${error.message}`);
+    throw new Error(
+      `Error in puppeteerGetContactDetails: ${profile.profileId}...\n${error.message}`
+    );
   }
 }
 

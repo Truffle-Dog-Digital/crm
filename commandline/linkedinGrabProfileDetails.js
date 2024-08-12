@@ -2,10 +2,7 @@ const { getTodayISODate, timeStamp } = require("./helpers-general");
 const {
   puppeteerGetContactDetails,
 } = require("./helpers-puppeteer-get-contact-details");
-const {
-  puppeteerGetNewProfileId,
-  puppeteerGetRoles,
-} = require("./helpers-puppeteer");
+const { puppeteerGetRoles } = require("./helpers-puppeteer");
 
 async function linkedinGrabProfileDetails(profileId, page) {
   try {
@@ -13,10 +10,6 @@ async function linkedinGrabProfileDetails(profileId, page) {
 
     // Just in case the page loads slowly, wait for the experience section
     await page.waitForSelector('xpath///section[.//div[@id="experience"]]');
-
-    // See if this profile is an old one with redirects to new one.
-    // Set profileId and oldProfileId appropriately
-    await puppeteerGetNewProfileId(newProfile, page);
 
     // Grab the person's name
     newProfile.name = await page.evaluate(() => {
@@ -37,25 +30,21 @@ async function linkedinGrabProfileDetails(profileId, page) {
     });
 
     // Check for a "Pending" connection request
-    console.log(`${timeStamp()} checking pending request`);
     newProfile.pendingConnectionRequest = await page
       .waitForSelector(
         'xpath///div[contains(@class, "ph5")]//button//span[text()="Pending"]',
-        { timeout: 10 }
+        { timeout: 500 }
       )
       .then(() => true)
       .catch(() => false);
 
     // Grab current roles, if any
-    console.log(`${timeStamp()} calling puppeteerGetRoles`);
     await puppeteerGetRoles(newProfile, page);
 
-    // Grab contact details, if any
-    console.log(`${timeStamp()} calling puppeteerGetContactDetails`);
+    // Grab contact details
     await puppeteerGetContactDetails(newProfile, page);
 
     // Record what date we grabbed this profile
-    console.log(`${timeStamp()} setting the date`);
     newProfile.lastGrabbed = getTodayISODate();
 
     return newProfile;

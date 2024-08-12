@@ -13,7 +13,7 @@ const inputFileCookies = "linkedinCookies.json";
 const profilesIn = "profilesIn.txt";
 const humansOutSuccess = "humansOutSuccess.jsonl";
 const profilesOutFail = "profilesOutFail.txt";
-const maxProfiles = 3;
+const maxProfiles = 5;
 
 // Main function
 (async () => {
