@@ -1,33 +1,5 @@
-// ---------------------------------------------------------------
-// List entries in humansMaster.jsonl that have duplicate profileIds
-// -> output to humansOutFail.jsonl
-// ---------------------------------------------------------------
-
 const fs = require("fs");
-const readline = require("readline");
-
-async function readJsonlFile(filePath) {
-  const data = [];
-  const fileStream = fs.createReadStream(filePath);
-  const rl = readline.createInterface({
-    input: fileStream,
-    crlfDelay: Infinity,
-  });
-
-  let totalLines = 0;
-
-  for await (const line of rl) {
-    const trimmedLine = line.trim();
-    if (trimmedLine) {
-      const json = JSON.parse(trimmedLine);
-      data.push(json);
-      totalLines++;
-    }
-  }
-
-  console.log(`Total lines read: ${totalLines}`);
-  return data;
-}
+const { getArrayFromJsonl } = require("./helpers-files");
 
 function findDuplicateProfileIds(data) {
   const seen = new Map();
@@ -35,6 +7,8 @@ function findDuplicateProfileIds(data) {
 
   for (const item of data) {
     const profileId = item.profileId;
+    const oldProfileId = item.oldProfileId;
+
     if (profileId) {
       if (seen.has(profileId)) {
         if (!duplicates.has(profileId)) {
@@ -43,6 +17,17 @@ function findDuplicateProfileIds(data) {
         duplicates.get(profileId).push(item);
       } else {
         seen.set(profileId, item);
+      }
+    }
+
+    if (oldProfileId) {
+      if (seen.has(oldProfileId)) {
+        if (!duplicates.has(oldProfileId)) {
+          duplicates.set(oldProfileId, [seen.get(oldProfileId)]);
+        }
+        duplicates.get(oldProfileId).push(item);
+      } else {
+        seen.set(oldProfileId, item);
       }
     }
   }
@@ -54,7 +39,12 @@ async function processDuplicates() {
   const masterFile = "humansMaster.jsonl";
   const outputFile = "humansOutFail.jsonl";
 
-  const data = await readJsonlFile(masterFile);
+  const data = await getArrayFromJsonl(masterFile);
+
+  if (!data) {
+    console.error("Failed to load or parse the master file.");
+    return;
+  }
 
   const duplicateProfileIds = findDuplicateProfileIds(data);
   duplicateProfileIds.sort((a, b) =>

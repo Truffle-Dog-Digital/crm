@@ -20,36 +20,50 @@ function getProfileId(input) {
 
 function reorderProfileDetails(profileDetails) {
   const {
+    ver,
     name,
     profileId,
-    oldProfileId,
     linkedinDistance,
-    roles,
-    requestSent,
     pendingConnectionRequest,
-    customText,
+    roles,
     notes,
-    channel,
-    bestChannelConnected,
+    firstContact,
+    requestLastSent,
     lastGrabbed,
     audit,
+    linkedinBirthday,
+    linkedinWebsite,
+    linkedinWebsites,
+    linkedinEmail,
+    linkedinConnected,
+    channel,
+    bestChannelConnected,
+    oldProfileId,
+    customText,
     ...rest
   } = profileDetails;
 
   const reorderedProfile = {
+    ver,
     name,
     profileId,
-    oldProfileId,
     linkedinDistance,
-    roles,
-    requestSent,
     pendingConnectionRequest,
-    customText,
+    roles,
     notes,
-    channel,
-    bestChannelConnected,
+    firstContact,
+    requestLastSent,
     lastGrabbed,
     audit,
+    linkedinBirthday,
+    linkedinWebsite,
+    linkedinWebsites,
+    linkedinEmail,
+    linkedinConnected,
+    channel,
+    bestChannelConnected,
+    oldProfileId,
+    customText,
     ...rest,
   };
 
@@ -63,7 +77,82 @@ function reorderProfileDetails(profileDetails) {
   return reorderedProfile;
 }
 
+function mergeHumans(master, update) {
+  // Step 1: Define the merge function for each merge strategy
+  function mergeOverwrite(masterValue, updateValue) {
+    return updateValue;
+  }
+
+  function mergeIgnore(masterValue, updateValue) {
+    return masterValue;
+  }
+
+  function mergeConcatMultiline(masterValue, updateValue) {
+    if (typeof masterValue === "string" && typeof updateValue === "string") {
+      return masterValue + "\n" + updateValue;
+    }
+    throw new Error(
+      `mergeContactMultiline called with one or more non-strings`
+    );
+  }
+
+  function mergeConcatArray(masterValue, updateValue) {
+    if (Array.isArray(masterValue) && Array.isArray(updateValue)) {
+      return masterValue.concat(updateValue);
+    }
+    throw new Error(`mergeConcatArray called with one or more non-arrays`);
+  }
+
+  // Step 2: Create a mapping of keys to merge functions inside the main function
+  const mergeStrategy = {
+    name: mergeOverwrite,
+    profileId: mergeIgnore,
+    linkedinDistance: mergeOverwrite,
+    pendingConnectionRequest: mergeOverwrite,
+    roles: mergeOverwrite,
+    notes: mergeConcatMultiline,
+    firstContact: mergeIgnore,
+    requestLastSent: mergeOverwrite,
+    lastGrabbed: mergeOverwrite,
+    audit: mergeConcatArray,
+    linkedinBirthday: mergeOverwrite,
+    linkedinWebsite: mergeOverwrite,
+    linkedinWebsites: mergeOverwrite,
+    linkedinEmail: mergeOverwrite,
+    linkedinConnected: mergeOverwrite,
+    channel: mergeOverwrite,
+    bestChannelConnected: mergeOverwrite,
+    oldProfileId: mergeIgnore,
+    customText: mergeOverwrite,
+  };
+
+  // Step 3: Merge the objects
+  const merged = { ...master }; // Start with a shallow copy of master
+
+  for (const key in update) {
+    const updateValue = update[key];
+    const masterValue = master[key];
+
+    if (masterValue === undefined || masterValue === null) {
+      // If the key is undefined or null in master, directly use the update value
+      merged[key] = updateValue;
+    } else {
+      const mergeFunction = mergeStrategy[key];
+      if (mergeFunction) {
+        // Apply the merge function if it exists
+        merged[key] = mergeFunction(masterValue, updateValue);
+      } else {
+        // If no strategy is defined, default to using the update value
+        merged[key] = updateValue;
+      }
+    }
+  }
+
+  return reorderProfileDetails(merged);
+}
+
 module.exports = {
   getProfileId,
   reorderProfileDetails,
+  mergeHumans,
 };

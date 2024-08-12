@@ -1,10 +1,10 @@
 const syncFs = require("fs");
 const fs = require("fs").promises;
 const linkedinCleanCookies = require("./linkedinCleanCookies");
-const { createPage } = require("./puppeteerSetup");
+const { createPage } = require("./helpers-puppeteer-setup");
 const linkedinGrabProfileDetails = require("./linkedinGrabProfileDetails");
 const { getProfileId, reorderProfileDetails } = require("./helpers-profiles");
-const { getArrayFromTextFile, getMapFromJsonl } = require("./helpers-files");
+const { getArrayFromTextFile } = require("./helpers-files");
 const { getTodayISODate } = require("./helpers-general");
 
 // Configuration
@@ -13,7 +13,7 @@ const inputFileCookies = "linkedinCookies.json";
 const profilesIn = "profilesIn.txt";
 const humansOutSuccess = "humansOutSuccess.jsonl";
 const profilesOutFail = "profilesOutFail.txt";
-const maxProfiles = 5;
+const maxProfiles = 15;
 
 // Main function
 (async () => {

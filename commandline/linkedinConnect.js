@@ -1,19 +1,19 @@
 const fs = require("fs").promises;
-const { waitForElementToDisappear } = require("./puppeteerSetup");
+const {
+  waitForElement,
+  waitForElementToDisappear,
+} = require("./helpers-puppeteer-xpath");
 
 // Assumes you're already on the LinkedIn profile page and the "Connect" button DOM element is loaded
 async function linkedinConnect(testMode, profile, page, customText) {
   try {
     let connectButton = null;
     // Locate the "Connect" button using a CSS selector
-    try {
-      connectButton = await page.waitForSelector(
-        'xpath///div[contains(@class, "ph5")]//span[text()="Connect"]'
-      );
-    } catch (error) {
-      console.log(`No connect button: ${profile}`);
-      return false;
-    }
+
+    connectButton = await waitForElement(
+      page,
+      '//div[contains(@class, "ph5")]//span[text()="Connect"]'
+    );
 
     if (connectButton) {
       await page.evaluate((btn) => btn.click(), connectButton);

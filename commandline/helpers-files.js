@@ -17,17 +17,16 @@ async function getArrayFromTextFile(filename) {
     }
   }
 
-  console.log(`${filename} ..     total non-blank lines: ${lines.length}`);
+  console.log(`${filename} .. total non-blank lines: ${lines.length}`);
   return lines;
 }
 
-// Return a map of humans from jsonl file
-// .. after doing duplicate checks and parsing json
-// .. return null if any of those fail
-async function getMapFromJsonl(filename) {
-  const dataMap = new Map();
+// Return an array of humans from a JSONL file
+// Checks for duplicate profileIds and includes everything except explicit duplicates
+async function getArrayFromJsonl(filename) {
+  const dataArray = [];
+  const seenProfileIds = new Set();
   let totalLines = 0;
-  let duplicateFound = false;
   let parseErrorFound = false;
 
   const fileStream = fs.createReadStream(filename);
@@ -42,14 +41,18 @@ async function getMapFromJsonl(filename) {
       totalLines++;
       try {
         const obj = JSON.parse(trimmedLine);
-        const key = `${obj.name || ""}-${obj.profileId}`;
+        const profileId = obj.profileId;
 
-        if (dataMap.has(key)) {
-          console.log(`Duplicate profile ID found: ${obj.profileId}`);
-          duplicateFound = true;
-        } else {
-          dataMap.set(key, obj);
+        if (profileId != null && seenProfileIds.has(profileId)) {
+          // Skip this object because it has a duplicate profileId
+          console.log(`Duplicate profile ID found:\n ${JSON.stringify(obj)}`);
+          continue;
         }
+
+        if (profileId != null) {
+          seenProfileIds.add(profileId);
+        }
+        dataArray.push(obj);
       } catch (error) {
         console.log(`Error parsing line: ${line}`);
         parseErrorFound = true;
@@ -58,27 +61,16 @@ async function getMapFromJsonl(filename) {
   }
 
   console.log(`${filename} .. total non-blank lines: ${totalLines}`);
-  console.log(`${filename} .. total objects processed: ${dataMap.size}`);
+  console.log(`${filename} .. total objects in array: ${dataArray.length}`);
 
-  if (parseErrorFound || duplicateFound) {
+  if (parseErrorFound) {
     return null;
   }
 
-  return dataMap;
-}
-
-// Return an array of humans from jsonl file
-async function getArrayFromJsonl(filename) {
-  const dataMap = await getMapFromJsonl(filename);
-  if (!dataMap) {
-    return null;
-  }
-
-  return Array.from(dataMap.values());
+  return dataArray;
 }
 
 module.exports = {
   getArrayFromTextFile,
-  getMapFromJsonl,
   getArrayFromJsonl,
 };
