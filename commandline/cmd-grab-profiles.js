@@ -10,10 +10,11 @@ const { getTodayISODate } = require("./helpers-general");
 // Configuration
 const headless = false;
 const inputFileCookies = "linkedinCookies.json";
-const profilesIn = "profilesIn.txt";
-const humansOutSuccess = "humansOutSuccess.jsonl";
+const profilesIn = "profilesInGrab.txt";
+const humansOutSuccess = "humansOutGrab.jsonl";
+const profilesOutRemain = "profilesOutGrabRemain.txt";
 const profilesOutFail = "profilesOutFail.txt";
-const maxProfiles = 15;
+const maxProfiles = 16;
 
 // Main function
 (async () => {
@@ -34,13 +35,17 @@ const maxProfiles = 15;
   let successfulLines = 0;
   let failedProfileLines = 0;
   let lastSuccessfulProfileId = null;
+
+  // Set up outputs
   const profilesOutFailData = [];
   const humansOutSuccessData = [];
+  const profilesOutRemainData = [];
 
   // Loop through each profile in the input file
   for (const profileInString of profilesInArray) {
     if (successfulLines >= maxProfiles) {
-      break;
+      profilesOutRemainData.push(profileInString);
+      continue;
     }
 
     totalLines++;
@@ -51,7 +56,6 @@ const maxProfiles = 15;
     // Skip if the profile ID is not valid or already exists in the master "database"
     if (!profileId || existingProfileIds.has(profileId)) {
       profilesOutFailData.push(profileInString);
-      preexistingLine++;
       continue;
     }
 
@@ -97,17 +101,27 @@ const maxProfiles = 15;
 
   await browser.close();
 
-  // Write output files
-  await fs.writeFile(
+  // Write successful profiles to the humansOutSuccess file in append mode
+  await fs.appendFile(
     humansOutSuccess,
-    humansOutSuccessData.map((item) => JSON.stringify(item)).join("\n"),
+    humansOutSuccessData.map((item) => JSON.stringify(item)).join("\n") + "\n",
     "utf8"
   );
+
+  // Write remaining profiles to profilesOutRemain (truncate mode)
+  await fs.writeFile(
+    profilesOutRemain,
+    profilesOutRemainData.join("\n"),
+    "utf8"
+  );
+
+  // Write failed profiles to profilesOutFail (truncate mode)
   await fs.writeFile(profilesOutFail, profilesOutFailData.join("\n"), "utf8");
 
   // Log the summary
   console.log(`Processed:       ${totalLines}`);
   console.log(`Failed grab:     ${failedProfileLines}`);
   console.log(`Successful:      ${successfulLines}`);
+  console.log(`Remaining:       ${profilesOutRemainData.length}`);
   console.log(`Last successful  ${lastSuccessfulProfileId}`);
 })();

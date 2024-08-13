@@ -12,12 +12,12 @@ const { getTodayISODate } = require("./helpers-general");
 const testMode = false;
 const headless = false;
 const inputFileCookies = "linkedinCookies.json";
-const profilesIn = "profilesIn.txt";
+const profilesIn = "profilesInRequestConnection.txt";
 const humansMaster = "humansMaster.jsonl";
 const humansOutSuccess = "humansOutSuccess.jsonl";
 const profilesOutFail = "profilesOutFail.txt";
 const linkedinCustomConnectionText = "linkedinCustomConnectionText.txt";
-const maxSuccessfulProfiles = 15;
+const maxSuccessfulProfiles = 20;
 
 // Main function
 (async () => {
