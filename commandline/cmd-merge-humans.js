@@ -3,12 +3,13 @@ const { getArrayFromJsonl } = require("./helpers-files");
 const { reorderProfileDetails, mergeHumans } = require("./helpers-profiles");
 
 async function main() {
-  const humansInFile = "humansIn.jsonl";
+  const humansInMergeFile = "humansInMerge.jsonl";
   const humansMasterFile = "humansMaster.jsonl";
-  const humansOutDiffsFile = "humansOutDiffs.jsonl";
+  const humansOutAuditFile = "humansOutAudit.jsonl";
+  const humansOutMasterFile = "humansOutMaster.jsonl";
 
   // Load arrays from JSONL files
-  const humansInArray = await getArrayFromJsonl(humansInFile);
+  const humansInArray = await getArrayFromJsonl(humansInMergeFile);
   const humansMasterArray = await getArrayFromJsonl(humansMasterFile);
 
   if (!humansInArray || !humansMasterArray) {
@@ -16,44 +17,93 @@ async function main() {
     return;
   }
 
-  // Create a map for easy lookup of master profiles by profileId
-  const masterMap = new Map();
-  humansMasterArray.forEach((human) => {
+  // Create a map for easy lookup of incoming profiles by profileId
+  const humansInMap = new Map();
+  humansInArray.forEach((human) => {
     if (human.profileId) {
-      masterMap.set(human.profileId, human);
+      humansInMap.set(human.profileId, human);
     }
   });
 
   const duplicateProfileIds = [];
-  const outputLines = [];
+  const outputAuditLines = [];
+  const outputMasterOriginalLines = [];
+  const outputHumansInOriginalLines = [];
+  const outputMasterMergedLines = [];
 
-  // Find duplicates and output them
-  humansInArray.forEach((humanIn) => {
-    const profileId = humanIn.profileId;
-    if (profileId && masterMap.has(profileId)) {
-      const humanMaster = masterMap.get(profileId);
+  let totalMerged = 0;
+  let totalMasterOriginal = 0;
+  let totalHumansInOriginal = 0;
+
+  // Iterate through the master array and check for updates
+  humansMasterArray.forEach((humanMaster) => {
+    const profileId = humanMaster.profileId;
+    if (profileId && humansInMap.has(profileId)) {
+      const humanIn = humansInMap.get(profileId);
       duplicateProfileIds.push(profileId);
 
       const humanOut = mergeHumans(humanMaster, humanIn);
 
-      // Add "ver" key with "old" and "new" values
+      // Add "ver" key with "old", "new", and "out" values
       humanMaster.ver = "old";
       humanIn.ver = "new";
       humanOut.ver = "out";
 
-      // Output the master record first, then the new one
-      outputLines.push(JSON.stringify(reorderProfileDetails(humanMaster)));
-      outputLines.push(JSON.stringify(reorderProfileDetails(humanIn)));
-      outputLines.push(JSON.stringify(reorderProfileDetails(humanOut)));
+      // Output the master record first, then the new one, then the merged one
+      outputAuditLines.push(JSON.stringify(reorderProfileDetails(humanMaster)));
+      outputAuditLines.push(JSON.stringify(reorderProfileDetails(humanIn)));
+      outputAuditLines.push(JSON.stringify(reorderProfileDetails(humanOut)));
+
+      // Remove "ver" key and prepare for the master output
+      delete humanOut.ver;
+      outputMasterMergedLines.push(JSON.stringify(humanOut));
+      totalMerged++;
+    } else {
+      // If no duplicate, include it in the master output
+      outputMasterOriginalLines.push(
+        JSON.stringify(reorderProfileDetails(humanMaster))
+      );
+      totalMasterOriginal++;
     }
   });
 
-  // Write the output to the humansOutDiffs.jsonl file
-  fs.writeFileSync(humansOutDiffsFile, outputLines.join("\n"), "utf8");
+  // Handle remaining new entries from the incoming map that weren't in the master array
+  humansInMap.forEach((humanIn, profileId) => {
+    if (!duplicateProfileIds.includes(profileId)) {
+      outputHumansInOriginalLines.push(
+        JSON.stringify(reorderProfileDetails(humanIn))
+      );
+      totalHumansInOriginal++;
+    }
+  });
 
-  console.log(
-    `Found ${duplicateProfileIds.length} duplicates. Output written to ${humansOutDiffsFile}.`
+  // Write the audit output to the humansOutAudit.jsonl file in append mode
+  fs.appendFileSync(
+    humansOutAuditFile,
+    outputAuditLines.join("\n") + "\n",
+    "utf8"
   );
+
+  // Join the non-duplicate and merged output arrays, adding the merged lines at the end
+  const outputAllLines = [
+    ...outputMasterOriginalLines,
+    ...outputHumansInOriginalLines,
+    ...outputMasterMergedLines,
+  ];
+
+  // Write the combined master output (non-merged followed by merged) to the humansOutMaster.jsonl file in append mode
+  fs.appendFileSync(
+    humansOutMasterFile,
+    outputAllLines.join("\n") + "\n",
+    "utf8"
+  );
+
+  const total = totalMasterOriginal + totalHumansInOriginal + totalMerged;
+  console.log("");
+  console.log(`Originals inserted from Master:   ${totalMasterOriginal}`);
+  console.log(`Originals inserted from HumansIn: ${totalHumansInOriginal}`);
+  console.log(`Merged entries inserted:          ${totalMerged}`);
+  console.log(`Total lines in resulting file:    ${total}`);
 }
 
 main();
