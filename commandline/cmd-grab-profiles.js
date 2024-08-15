@@ -14,7 +14,7 @@ const profilesIn = "profilesInGrab.txt";
 const humansOutSuccess = "humansOutGrab.jsonl";
 const profilesOutRemain = "profilesOutGrabRemain.txt";
 const profilesOutFail = "profilesOutFail.txt";
-const maxProfiles = 16;
+const maxProfiles = 15;
 
 // Main function
 (async () => {
@@ -102,21 +102,17 @@ const maxProfiles = 16;
   await browser.close();
 
   // Write successful profiles to the humansOutSuccess file in append mode
-  await fs.appendFile(
+  fs.appendFileSync(
     humansOutSuccess,
     humansOutSuccessData.map((item) => JSON.stringify(item)).join("\n") + "\n",
     "utf8"
   );
 
   // Write remaining profiles to profilesOutRemain (truncate mode)
-  await fs.writeFile(
-    profilesOutRemain,
-    profilesOutRemainData.join("\n"),
-    "utf8"
-  );
+  fs.writeFileSync(profilesOutRemain, profilesOutRemainData.join("\n"), "utf8");
 
   // Write failed profiles to profilesOutFail (truncate mode)
-  await fs.writeFile(profilesOutFail, profilesOutFailData.join("\n"), "utf8");
+  fs.writeFileSync(profilesOutFail, profilesOutFailData.join("\n"), "utf8");
 
   // Log the summary
   console.log(`Processed:       ${totalLines}`);

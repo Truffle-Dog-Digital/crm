@@ -5,7 +5,7 @@ const { createPage } = require("./helpers-puppeteer-setup");
 const linkedinGrabProfileDetails = require("./linkedinGrabProfileDetails");
 const linkedinConnect = require("./linkedinConnect");
 const { getProfileId, reorderProfileDetails } = require("./helpers-profiles");
-const { getArrayFromTextFile, getMapFromJsonl } = require("./helpers-files");
+const { getArrayFromTextFile, getArrayFromJsonl } = require("./helpers-files");
 const { getTodayISODate } = require("./helpers-general");
 
 // Configuration
@@ -30,16 +30,18 @@ const maxSuccessfulProfiles = 20;
   // Read custom connection text from file (line delimited text)
   const customText = await fs.readFile(linkedinCustomConnectionText, "utf8");
 
-  // Read the master "database" of humans (JSONL)
-  const humansData = await getMapFromJsonl(humansMaster);
-  if (!humansData) {
+  // Load the humans master data as an array
+  const humansArray = await getArrayFromJsonl(humansMaster);
+  if (!humansArray) {
     console.error("Failed to load humans from JSONL.");
     return;
   }
 
   // Create a set of existing profile IDs to dedupe connection requests
   const existingProfileIds = new Set(
-    Array.from(humansData.values()).map((human) => human.profileId)
+    humansArray
+      .flatMap((human) => [human.profileId, human.oldProfileId])
+      .filter((id) => id !== undefined && id !== null)
   );
 
   // Setup Puppeteer with cleaned Linkedin cookies
@@ -69,8 +71,15 @@ const maxSuccessfulProfiles = 20;
 
     // If the profile ID is not valid skip it
     if (!profileId) {
-      console.log(`Couldn't get id from:  ${profileUrl}`);
+      console.log(`Couldn't get id from:  ${profileInString}`);
       profilesOutFailData.push(profileInString);
+      continue;
+    }
+
+    // If the profile ID is already in our DB, skip it
+    if (existingProfileIds.has(profileId)) {
+      console.log(`Profile ID ${profileId} already in DB, skipping.`);
+      preexistingLines++;
       continue;
     }
 
@@ -81,16 +90,12 @@ const maxSuccessfulProfiles = 20;
     try {
       await page.goto(profileUrl, { waitUntil: "domcontentloaded" });
 
-      // Grab the profile details from current page
+      // Grab the profile details from the current page
       const profileDetails = await linkedinGrabProfileDetails(profileId, page);
 
       if (profileDetails) {
-        // Already connected.
-        // Add the profile details to the output file as JSONL for master
-        // because we might have additional details post-connection.
-        //    But don't increase the successfulLines counter because we
-        //    won't try to connect
-        if (profileDetails.linkedinDistance == "1st") {
+        // Already connected
+        if (profileDetails.linkedinDistance === "1st") {
           alreadyConnectedLines++;
           profileDetails.audit = [`${getTodayISODate()}: Grabbed profile`];
           humansOutSuccessData.push(reorderProfileDetails(profileDetails));
@@ -98,11 +103,7 @@ const maxSuccessfulProfiles = 20;
           continue;
         }
 
-        // Pending connection request.
-        // Add the profile details to the output file as JSONL for master
-        // because we might have additional details post-connection.
-        //    But don't increase the successfulLines counter because we
-        //    won't try to connect
+        // Pending connection request
         if (profileDetails.pendingConnectionRequest) {
           pendingConnections++;
           profileDetails.audit = [`${getTodayISODate()}: Grabbed profile`];
@@ -120,14 +121,14 @@ const maxSuccessfulProfiles = 20;
         );
 
         if (connectionRequested) {
-          // Record the date we sent this request and include in audit
+          profileDetails.pendingConnectionRequest = true;
+          profileDetails.customText = customText;
           profileDetails.requestLastSent = getTodayISODate();
           profileDetails.audit = [
             `${getTodayISODate()}: Sent connection request`,
           ];
 
-          // If this profile is already in the DB, log a warning
-          // to take manual action - otherwise set firstContact
+          // Check if the profile is already in the DB
           if (
             existingProfileIds.has(profileDetails.profileId) ||
             (profileDetails.oldProfileId &&
@@ -140,21 +141,16 @@ const maxSuccessfulProfiles = 20;
             profileDetails.firstContact = getTodayISODate();
           }
 
-          // Make the object easier to read in JSONL output and push to output humans
-          const reorderedProfileDetails = reorderProfileDetails(profileDetails);
-          humansOutSuccessData.push(reorderedProfileDetails);
+          // Reorder and save profile details
+          humansOutSuccessData.push(reorderProfileDetails(profileDetails));
 
           successfulLines++;
           lastSuccessfulProfileId = profileId;
         } else {
-          // Profile grabbed, but the connection request failed.
-          // They're not a 1st, so this is worth investigating.
-          // Also, worth recording the updated profile details
           console.log(`Failed to send request:   ${profileUrl}`);
           profilesOutFailData.push(profileInString);
         }
       } else {
-        // Failed to grab profile details
         failedProfileLines++;
         console.log(`Failed profile grab:   ${profileUrl}`);
         profilesOutFailData.push(profileInString);
@@ -170,19 +166,19 @@ const maxSuccessfulProfiles = 20;
   await browser.close();
 
   // Write output files
-  await fs.writeFile(
+  await fs.appendFile(
     humansOutSuccess,
-    humansOutSuccessData.map((item) => JSON.stringify(item)).join("\n"),
+    humansOutSuccessData.map((item) => JSON.stringify(item)).join("\n") + "\n",
     "utf8"
   );
-  await fs.writeFile(profilesOutFail, profilesOutFailData.join("\n"), "utf8");
+  await fs.appendFile(profilesOutFail, profilesOutFailData.join("\n"), "utf8");
 
   // Log the summary
   console.log(`Processed:         ${totalLines}`);
   console.log(`Already in DB:     ${preexistingLines}`);
-  console.log(`Already pending    ${pendingConnections}`);
+  console.log(`Already pending:   ${pendingConnections}`);
   console.log(`Already connected: ${alreadyConnectedLines}`);
   console.log(`Failed grab:       ${failedProfileLines}`);
   console.log(`Successful:        ${successfulLines}`);
-  console.log(`Last successful    ${lastSuccessfulProfileId}`);
+  console.log(`Last successful:   ${lastSuccessfulProfileId}`);
 })();

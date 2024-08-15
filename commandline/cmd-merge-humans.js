@@ -92,7 +92,7 @@ async function main() {
   ];
 
   // Write the combined master output (non-merged followed by merged) to the humansOutMaster.jsonl file in append mode
-  fs.appendFileSync(
+  fs.writeFileSync(
     humansOutMasterFile,
     outputAllLines.join("\n") + "\n",
     "utf8"

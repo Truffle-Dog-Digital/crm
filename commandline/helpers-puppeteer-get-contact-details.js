@@ -31,7 +31,7 @@ async function puppeteerGetContactDetails(profile, page) {
         );
 
         if (oneSection) {
-          // Evaluate the page to extract contact info sections, ignoring the first one
+          // Evaluate the page to extract contact info sections
           const contactInfo = await page.evaluate(() => {
             const sections = Array.from(
               document.querySelectorAll("section.pv-contact-info__contact-type")
@@ -39,6 +39,11 @@ async function puppeteerGetContactDetails(profile, page) {
             const contactDetails = {};
 
             sections.forEach((section, index) => {
+              // Anything with less than 3 children is irrelevant to us
+              if (section.children.length <= 2) {
+                return;
+              }
+
               const key =
                 "linkedin" + section.querySelector("h3")?.innerText.trim();
               const sibling = section.querySelector("h3").nextElementSibling;
