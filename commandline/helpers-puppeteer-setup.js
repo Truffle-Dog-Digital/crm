@@ -10,10 +10,18 @@ async function createPage(cleanedCookies, headless) {
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1024, height: 1024 });
-  await page.setDefaultNavigationTimeout(7000);
-  await page.setDefaultTimeout(7000);
+  await page.setDefaultNavigationTimeout(5000);
+  await page.setDefaultTimeout(5000);
   await page.deleteCookie(...(await page.cookies()));
   await page.setCookie(...cleanedCookies);
+
+  // Listen for console events on the page
+  // page.on("console", (msg) => {
+  //   for (let i = 0; i < msg.args().length; ++i) {
+  //     console.log(`IN-PAGE-LOG: ${msg.text()}`);
+  //   }
+  // });
+
   return { browser, page };
 }
 

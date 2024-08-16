@@ -102,17 +102,21 @@ const maxProfiles = 15;
   await browser.close();
 
   // Write successful profiles to the humansOutSuccess file in append mode
-  fs.appendFileSync(
+  await fs.appendFile(
     humansOutSuccess,
     humansOutSuccessData.map((item) => JSON.stringify(item)).join("\n") + "\n",
     "utf8"
   );
 
   // Write remaining profiles to profilesOutRemain (truncate mode)
-  fs.writeFileSync(profilesOutRemain, profilesOutRemainData.join("\n"), "utf8");
+  await fs.writeFile(
+    profilesOutRemain,
+    profilesOutRemainData.join("\n"),
+    "utf8"
+  );
 
   // Write failed profiles to profilesOutFail (truncate mode)
-  fs.writeFileSync(profilesOutFail, profilesOutFailData.join("\n"), "utf8");
+  await fs.writeFile(profilesOutFail, profilesOutFailData.join("\n"), "utf8");
 
   // Log the summary
   console.log(`Processed:       ${totalLines}`);

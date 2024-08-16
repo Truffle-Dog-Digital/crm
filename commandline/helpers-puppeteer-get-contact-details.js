@@ -25,41 +25,53 @@ async function puppeteerGetContactDetails(profile, page) {
 
       if (dismissButton) {
         // Wait for the contact info sections to appear
-        const oneSection = await waitForElement(
-          page,
-          "//section[contains(@class, 'pv-contact-info__contact-type')]"
-        );
+        const sectionSelector =
+          "//section[contains(@class, 'pv-contact-info__contact-type') and .//h3]";
+
+        const oneSection = await waitForElement(page, sectionSelector);
 
         if (oneSection) {
           // Evaluate the page to extract contact info sections
-          const contactInfo = await page.evaluate(() => {
-            const sections = Array.from(
-              document.querySelectorAll("section.pv-contact-info__contact-type")
+          const contactInfo = await page.evaluate((sectionSelector) => {
+            const xpathResult = document.evaluate(
+              sectionSelector,
+              document,
+              null,
+              XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+              null
             );
+
+            const sections = [];
+            for (let i = 0; i < xpathResult.snapshotLength; i++) {
+              sections.push(xpathResult.snapshotItem(i));
+            }
+
             const contactDetails = {};
 
             sections.forEach((section, index) => {
-              // Anything with less than 3 children is irrelevant to us
-              if (section.children.length <= 2) {
-                return;
-              }
+              // Grab two child elements we're interested in
+              const section2ndChild = section.children[1];
+              const section3rdChild = section.children[2];
 
-              const key =
-                "linkedin" + section.querySelector("h3")?.innerText.trim();
-              const sibling = section.querySelector("h3").nextElementSibling;
+              // Extract the key from the 2nd child
+              const key = "linkedin" + section2ndChild.innerText.trim();
+
+              // Grab the value from the 3rd child
               let value = "";
-
-              if (sibling.tagName.toLowerCase() === "ul") {
-                value = sibling.querySelector("a")?.innerText.trim();
+              if (section3rdChild.tagName.toLowerCase() === "ul") {
+                value = section3rdChild.querySelector("a")?.innerText.trim();
               } else {
-                value = sibling?.innerText.trim();
+                value = section3rdChild?.innerText.trim();
               }
+
+              // Add the key-value pair to the contact details
               contactDetails[key] = value;
             });
 
             return contactDetails;
-          });
+          }, sectionSelector); // Pass the XPath selector as an argument here
 
+          // Pass sectionSelector as an argument here
           // The first object in contactDetails is the user's CURRENT profile.
           // if it's different from the profile we navigated to,
           // store oldProfileId and profileId appropriately
