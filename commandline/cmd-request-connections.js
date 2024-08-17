@@ -7,9 +7,10 @@ const linkedinConnect = require("./linkedinConnect");
 const { getProfileId, reorderProfileDetails } = require("./helpers-profiles");
 const { getArrayFromTextFile, getArrayFromJsonl } = require("./helpers-files");
 const { getTodayISODate } = require("./helpers-general");
+const { profile } = require("console");
 
 // Configuration
-const testMode = false;
+const testMode = true;
 const headless = false;
 const inputFileCookies = "linkedinCookies.json";
 const profilesIn = "profilesInRequestConnection.txt";
@@ -121,6 +122,7 @@ const maxSuccessfulProfiles = 20;
         );
 
         if (connectionRequested) {
+          profileDetails.campaign = "v1";
           profileDetails.pendingConnectionRequest = true;
           profileDetails.customText = customText;
           profileDetails.requestLastSent = getTodayISODate();

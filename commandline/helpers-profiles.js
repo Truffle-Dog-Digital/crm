@@ -40,6 +40,7 @@ function reorderProfileDetails(profileDetails) {
     bestChannelConnected,
     oldProfileId,
     customText,
+    campaign,
     ...rest
   } = profileDetails;
 
@@ -64,6 +65,7 @@ function reorderProfileDetails(profileDetails) {
     bestChannelConnected,
     oldProfileId,
     customText,
+    campaign,
     ...rest,
   };
 
