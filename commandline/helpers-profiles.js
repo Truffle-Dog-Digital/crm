@@ -1,87 +1,3 @@
-// Return a profileId regardless of whether the input is
-// a linkedin URL with an embedded profileId or a direct profileId
-function getProfileId(input) {
-  const regex = /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/([^/]+)\/?$/;
-  const directRegex = /^[a-zA-Z0-9-]+$/;
-
-  if (directRegex.test(input)) {
-    return input;
-  }
-
-  const match = input.match(regex);
-
-  if (match) {
-    return match[3];
-  } else {
-    console.log(`Error: Unable to extract profile ID from input: ${input}`);
-    return null;
-  }
-}
-
-function reorderProfileDetails(profileDetails) {
-  const {
-    ver,
-    name,
-    profileId,
-    linkedinDistance,
-    pendingConnectionRequest,
-    roles,
-    notes,
-    firstContact,
-    requestLastSent,
-    lastGrabbed,
-    audit,
-    linkedinBirthday,
-    linkedinWebsite,
-    linkedinWebsites,
-    linkedinEmail,
-    linkedinConnected,
-    channel,
-    bestChannelConnected,
-    oldProfileId,
-    customText,
-    campaign,
-    social,
-    ignore,
-    ...rest
-  } = profileDetails;
-
-  const reorderedProfile = {
-    ver,
-    name,
-    profileId,
-    linkedinDistance,
-    pendingConnectionRequest,
-    roles,
-    notes,
-    firstContact,
-    requestLastSent,
-    lastGrabbed,
-    audit,
-    linkedinBirthday,
-    linkedinWebsite,
-    linkedinWebsites,
-    linkedinEmail,
-    linkedinConnected,
-    channel,
-    bestChannelConnected,
-    oldProfileId,
-    customText,
-    social,
-    ignore,
-    ...rest,
-  };
-
-  // Remove keys with undefined or null values
-  Object.keys(reorderedProfile).forEach((key) => {
-    if (reorderedProfile[key] === undefined || reorderedProfile[key] === null) {
-      delete reorderedProfile[key];
-    }
-  });
-
-  return reorderedProfile;
-}
-
 function mergeHumans(master, update) {
   // Step 1: Define the merge function for each merge strategy
   function mergeOverwrite(masterValue, updateValue) {
@@ -96,9 +12,7 @@ function mergeHumans(master, update) {
     if (typeof masterValue === "string" && typeof updateValue === "string") {
       return masterValue + "\n" + updateValue;
     }
-    throw new Error(
-      `mergeContactMultiline called with one or more non-strings`
-    );
+    throw new Error(`mergeConcatMultiline called with one or more non-strings`);
   }
 
   function mergeConcatArray(masterValue, updateValue) {
@@ -140,26 +54,20 @@ function mergeHumans(master, update) {
     const updateValue = update[key];
     const masterValue = master[key];
 
-    if (masterValue === undefined || masterValue === null) {
+    // Check if there's a merge strategy defined for the key
+    const mergeFunction = mergeStrategy[key];
+    if (!mergeFunction) {
+      throw new Error(`Error: No merge strategy defined for key: "${key}"`);
+    }
+
+    // If the key exists in the master, apply the merge function
+    if (masterValue !== undefined && masterValue !== null) {
+      merged[key] = mergeFunction(masterValue, updateValue);
+    } else {
       // If the key is undefined or null in master, directly use the update value
       merged[key] = updateValue;
-    } else {
-      const mergeFunction = mergeStrategy[key];
-      if (mergeFunction) {
-        // Apply the merge function if it exists
-        merged[key] = mergeFunction(masterValue, updateValue);
-      } else {
-        // If no strategy is defined, default to using the update value
-        merged[key] = updateValue;
-      }
     }
   }
 
   return reorderProfileDetails(merged);
 }
-
-module.exports = {
-  getProfileId,
-  reorderProfileDetails,
-  mergeHumans,
-};
