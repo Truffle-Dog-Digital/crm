@@ -8,8 +8,11 @@ const { getProfileId, reorderProfileDetails } = require("./helpers-profiles");
 const { getArrayFromTextFile, getArrayFromJsonl } = require("./helpers-files");
 const { getTodayISODate } = require("./helpers-general");
 
-// Configuration
+// Per-run configuration
 const testMode = false;
+const social = true;
+
+// Stable configuration
 const headless = false;
 const inputFileCookies = "linkedinCookies.json";
 const profilesIn = "profilesInRequestConnection.txt";
@@ -94,6 +97,8 @@ const maxSuccessfulProfiles = 20;
       const profileDetails = await linkedinGrabProfileDetails(profileId, page);
 
       if (profileDetails) {
+        profileDetails.social = social;
+
         // Already connected
         if (profileDetails.linkedinDistance === "1st") {
           alreadyConnectedLines++;

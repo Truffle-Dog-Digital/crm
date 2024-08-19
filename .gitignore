@@ -27,6 +27,7 @@ firebase-debug.log
 
 # Text files, only used at runtime
 *.txt
+*.csv
 
 # Mac
 .DS_Store

@@ -40,6 +40,8 @@ function reorderProfileDetails(profileDetails) {
     bestChannelConnected,
     oldProfileId,
     customText,
+    social,
+    ignore,
     ...rest
   } = profileDetails;
 
@@ -64,6 +66,8 @@ function reorderProfileDetails(profileDetails) {
     bestChannelConnected,
     oldProfileId,
     customText,
+    social,
+    ignore,
     ...rest,
   };
 
@@ -124,6 +128,8 @@ function mergeHumans(master, update) {
     bestChannelConnected: mergeOverwrite,
     oldProfileId: mergeIgnore,
     customText: mergeOverwrite,
+    social: mergeOverwrite,
+    ignore: mergeOverwrite,
   };
 
   // Step 3: Merge the objects
