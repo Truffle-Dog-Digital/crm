@@ -40,6 +40,7 @@ function reorderProfileDetails(profileDetails) {
     bestChannelConnected,
     oldProfileId,
     customText,
+    campaign,
     social,
     ignore,
     ...rest

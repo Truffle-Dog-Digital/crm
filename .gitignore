@@ -39,4 +39,4 @@ secrets.json
 # various input/output data files
 *.jsonl
 log.*
-
+*.csv
