@@ -1,3 +1,87 @@
+// Return a profileId regardless of whether the input is
+// a linkedin URL with an embedded profileId or a direct profileId
+function getProfileId(input) {
+  const regex = /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/([^/]+)\/?$/;
+  const directRegex = /^[a-zA-Z0-9-]+$/;
+
+  if (directRegex.test(input)) {
+    return input;
+  }
+
+  const match = input.match(regex);
+
+  if (match) {
+    return match[3];
+  } else {
+    console.log(`Error: Unable to extract profile ID from input: ${input}`);
+    return null;
+  }
+}
+
+function reorderProfileDetails(profileDetails) {
+  const {
+    ver,
+    name,
+    profileId,
+    linkedinDistance,
+    pendingConnectionRequest,
+    roles,
+    notes,
+    firstContact,
+    requestLastSent,
+    lastGrabbed,
+    audit,
+    linkedinBirthday,
+    linkedinWebsite,
+    linkedinWebsites,
+    linkedinEmail,
+    linkedinConnected,
+    channel,
+    bestChannelConnected,
+    oldProfileId,
+    customText,
+    campaign,
+    social,
+    ignore,
+    ...rest
+  } = profileDetails;
+
+  const reorderedProfile = {
+    ver,
+    name,
+    profileId,
+    linkedinDistance,
+    pendingConnectionRequest,
+    roles,
+    notes,
+    firstContact,
+    requestLastSent,
+    lastGrabbed,
+    audit,
+    linkedinBirthday,
+    linkedinWebsite,
+    linkedinWebsites,
+    linkedinEmail,
+    linkedinConnected,
+    channel,
+    bestChannelConnected,
+    oldProfileId,
+    customText,
+    social,
+    ignore,
+    ...rest,
+  };
+
+  // Remove keys with undefined or null values
+  Object.keys(reorderedProfile).forEach((key) => {
+    if (reorderedProfile[key] === undefined || reorderedProfile[key] === null) {
+      delete reorderedProfile[key];
+    }
+  });
+
+  return reorderedProfile;
+}
+
 function mergeHumans(master, update) {
   // Step 1: Define the merge function for each merge strategy
   function mergeOverwrite(masterValue, updateValue) {
@@ -71,3 +155,9 @@ function mergeHumans(master, update) {
 
   return reorderProfileDetails(merged);
 }
+
+module.exports = {
+  getProfileId,
+  reorderProfileDetails,
+  mergeHumans,
+};
