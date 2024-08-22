@@ -12,6 +12,7 @@ const { profile } = require("console");
 // Per-run configuration
 const testMode = false;
 const social = true;
+const maxSuccessfulProfiles = 20;
 
 // Stable configuration
 const headless = false;
@@ -21,7 +22,6 @@ const humansMaster = "humansMaster.jsonl";
 const humansOutSuccess = "humansOutSuccess.jsonl";
 const profilesOutFail = "profilesOutFail.txt";
 const linkedinCustomConnectionText = "linkedinCustomConnectionText.txt";
-const maxSuccessfulProfiles = 20;
 
 // Main function
 (async () => {
