@@ -36,6 +36,7 @@ function reorderProfileDetails(profileDetails) {
     linkedinWebsites,
     linkedinEmail,
     linkedinConnected,
+    linkedinAddress,
     channel,
     bestChannelConnected,
     oldProfileId,
@@ -63,6 +64,7 @@ function reorderProfileDetails(profileDetails) {
     linkedinWebsites,
     linkedinEmail,
     linkedinConnected,
+    linkedinAddress,
     channel,
     bestChannelConnected,
     oldProfileId,
@@ -123,6 +125,7 @@ function mergeHumans(master, update) {
     linkedinWebsites: mergeOverwrite,
     linkedinEmail: mergeOverwrite,
     linkedinConnected: mergeOverwrite,
+    linkedinAddress: mergeOverwrite,
     channel: mergeOverwrite,
     bestChannelConnected: mergeOverwrite,
     oldProfileId: mergeIgnore,
@@ -141,7 +144,7 @@ function mergeHumans(master, update) {
     // Check if there's a merge strategy defined for the key
     const mergeFunction = mergeStrategy[key];
     if (!mergeFunction) {
-      throw new Error(`Error: No merge strategy defined for key: "${key}"`);
+      throw new Error(`Error: No merge strategy defined for key: ${key}`);
     }
 
     // If the key exists in the master, apply the merge function
